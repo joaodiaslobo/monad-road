@@ -71,7 +71,7 @@ Pode gerar a documentação com o `haddock`.
 $ cabal haddock --haddock-all
 ```
 
-2. Usando o diretamente o Haddock
+2. Usando diretamente o Haddock
 
 ```bash
 $ haddock -h -o doc/html src/*.hs
