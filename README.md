@@ -62,7 +62,6 @@ Pode gerar a documentação com o `haddock`.
 1. Usando o cabal
 
 ```bash
-
 $ cabal haddock --haddock-all
 ```
 
