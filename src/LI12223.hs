@@ -9,10 +9,10 @@ Copyright   : Manuel Barros <d13242@di.uminho.pt>
 Tipos de dados e funções auxiliares para a realização do projeto de LI1 em 2022/23.
  -}
 module LI12223 (
-    -- * Tipos de dados
-    -- ** Básicos
-   Coordenadas , Largura , Velocidade,
-    -- ** Mapas
+  -- * Tipos de dados
+  -- ** Básicos
+  Coordenadas , Largura , Velocidade,
+  -- ** Mapas
   Mapa, Terreno(..), Obstaculo(..),
     -- ** Jogo
   Jogo(..), Jogador(..), Direcao(..), Jogada(..)
