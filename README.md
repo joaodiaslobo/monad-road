@@ -38,7 +38,7 @@ O projecto utiliza a biblioteca [HUnit](https://hackage.haskell.org/package/HUni
 
 Pode correr os testes utilizando uma das seguintes alternativas:
 
-1. Usando o cabal
+1. Usando o `cabal`
 
 ```bash
 $ cabal test
@@ -53,6 +53,12 @@ $ ghci -i="src" -i="tests" tests/Spec.hs
 >>> runTestsT3 -- Correr os testes tarefa 3
 >>> runTestsT4 -- Correr os testes tarefa 4
 >>> main -- Correr todos os testes
+```
+
+3. Usando o wrapper `runhaskell`
+
+```bash
+$ runhaskell -i="src" -i="tests" tests/Spec.hs
 ```
 
 ## Documentação
