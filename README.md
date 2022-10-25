@@ -55,6 +55,23 @@ $ ghci -i="src" -i="tests" tests/Spec.hs
 >>> main -- Correr todos os testes
 ```
 
+## Documentação
+
+Pode gerar a documentação com o `haddock`.
+
+1. Usando o cabal
+
+```bash
+
+$ cabal haddock --haddock-all
+```
+
+2. Usando o diretamente o Haddock
+
+```bash
+$ haddock -h -o doc/html src/*.hs
+```
+
 ## Grupo 2
 
 - **A104356** João d'Araújo Dias Lobo;

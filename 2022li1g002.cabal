@@ -11,6 +11,17 @@ version:            0.1.0.0
 author:             João d'Araújo Dias Lobo <a104356@alunos.uminho.pt>
                     Rita da Cunha Camacho <a104439@alunos.uminho.pt>
 
+library
+  exposed-modules:
+    LI12223
+    Tarefa1_2022li1g002
+    Tarefa2_2022li1g002
+    Tarefa3_2022li1g002
+    Tarefa4_2022li1g002
+  build-depends:    base ^>=4.16.3.0
+  hs-source-dirs:   src
+  default-language: Haskell2010
+
 executable 2022li1g002
   main-is:          Main.hs
   other-modules:
