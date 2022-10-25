@@ -9,7 +9,7 @@ $ git clone git@gitlab.com:uminho-di/li1/2223/2022li1g002.git
 $ cd 2022li1g002
 ```
 
-Também pode fazer clone com o seguinte por https com o seguinte link:
+Alternativamente, pode fazer clone por https com o seguinte link:
 
 ```bash
 $ git clone https://gitlab.com/uminho-di/li1/2223/projetos/2022li1g002.git
