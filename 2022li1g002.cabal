@@ -1,0 +1,41 @@
+cabal-version:      2.4
+name:               2022li1g002
+version:            0.1.0.0
+
+-- A short (one-line) description of the package.
+-- synopsis:
+
+-- A longer description of the package.
+-- description:
+
+author:             João d'Araújo Dias Lobo <a104356@alunos.uminho.pt>
+                    Rita da Cunha Camacho <a104439@alunos.uminho.pt>
+
+executable 2022li1g002
+  main-is:          Main.hs
+  other-modules:
+    LI12223
+    Tarefa1_2022li1g002
+    Tarefa2_2022li1g002
+    Tarefa3_2022li1g002
+    Tarefa4_2022li1g002
+  build-depends:    base ^>=4.16.3.0
+  hs-source-dirs:   src
+  default-language: Haskell2010
+
+test-suite 2022li1g002-tests
+  type:                 exitcode-stdio-1.0
+  main-is:              Spec.hs
+  other-modules:
+    LI12223
+    Tarefa1_2022li1g002
+    Tarefa2_2022li1g002
+    Tarefa3_2022li1g002
+    Tarefa4_2022li1g002
+    Tarefa1_2022li1g002_Spec
+    Tarefa2_2022li1g002_Spec
+    Tarefa3_2022li1g002_Spec
+    Tarefa4_2022li1g002_Spec
+  build-depends:        base ^>=4.16.3.0, HUnit
+  hs-source-dirs:       tests src
+  default-language:     Haskell2010
