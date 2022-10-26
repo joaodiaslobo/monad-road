@@ -13,7 +13,7 @@ module LI12223 (
   -- ** Básicos
   Coordenadas , Largura , Velocidade,
   -- ** Mapas
-  Mapa, Terreno(..), Obstaculo(..),
+  Mapa(..), Terreno(..), Obstaculo(..),
     -- ** Jogo
   Jogo(..), Jogador(..), Direcao(..), Jogada(..)
   ) where
