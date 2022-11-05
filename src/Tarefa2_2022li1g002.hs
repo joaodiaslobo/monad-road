@@ -17,4 +17,24 @@ proximosTerrenosValidos :: Mapa -> [Terreno]
 proximosTerrenosValidos = undefined
 
 proximosObstaculosValidos :: Int -> (Terreno, [Obstaculo]) -> [Obstaculo]
-proximosObstaculosValidos = undefined
+proximosObstaculosValidos l (terr, obs) =
+    case terr of
+        Relva -> if length obs == l then [] else 
+            if (length obs) + 1 == l && not (elem Nenhum obs) then [Nenhum] else
+                [Nenhum, Arvore]
+        Estrada _ -> if length obs == l then [] else
+            if (length obs) + 1 == l && not (elem Nenhum obs) then [Nenhum] else
+                proximosObstaculosEstradaAux obs 0
+        Rio _ -> if length obs == l then [] else 
+            if (length obs) + 1 == l && not (elem Nenhum obs) then [Nenhum] else
+                proximosObstaculosRioAux obs 0
+ 
+proximosObstaculosEstradaAux :: [Obstaculo] -> Int -> [Obstaculo]
+proximosObstaculosEstradaAux _ 3 = [Nenhum]
+proximosObstaculosEstradaAux [] _ = [Nenhum, Carro]
+proximosObstaculosEstradaAux l n = if (last l == Carro) then proximosObstaculosEstradaAux (init l) (n+1) else [Nenhum, Carro]
+
+proximosObstaculosRioAux :: [Obstaculo] -> Int -> [Obstaculo]
+proximosObstaculosRioAux _ 5 = [Nenhum]
+proximosObstaculosRioAux [] _ = [Nenhum, Tronco]
+proximosObstaculosRioAux l n = if (last l == Tronco) then proximosObstaculosRioAux (init l) (n+1) else [Nenhum, Tronco]
