@@ -18,16 +18,18 @@ proximosTerrenosValidos = undefined
 
 proximosObstaculosValidos :: Int -> (Terreno, [Obstaculo]) -> [Obstaculo]
 proximosObstaculosValidos l (terr, obs) =
-    case terr of
-        Relva -> if length obs == l then [] else 
-            if (length obs) + 1 == l && not (elem Nenhum obs) then [Nenhum] else
-                [Nenhum, Arvore]
-        Estrada _ -> if length obs == l then [] else
-            if (length obs) + 1 == l && not (elem Nenhum obs) then [Nenhum] else
-                proximosObstaculosEstradaAux obs 0
-        Rio _ -> if length obs == l then [] else 
-            if (length obs) + 1 == l && not (elem Nenhum obs) then [Nenhum] else
-                proximosObstaculosRioAux obs 0
+    let cheio = length obs == l
+        ultNenhum = (length obs) + 1 == l && not (elem Nenhum obs) in
+        case terr of
+            Relva -> if cheio then [] else 
+                if ultNenhum then [Nenhum] else
+                    [Nenhum, Arvore]
+            Estrada _ -> if cheio then [] else
+                if ultNenhum then [Nenhum] else
+                    proximosObstaculosEstradaAux obs 0
+            Rio _ -> if cheio then [] else 
+                if ultNenhum then [Nenhum] else
+                    proximosObstaculosRioAux obs 0
  
 proximosObstaculosEstradaAux :: [Obstaculo] -> Int -> [Obstaculo]
 proximosObstaculosEstradaAux _ 3 = [Nenhum]
