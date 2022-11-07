@@ -13,8 +13,47 @@ import LI12223
 estendeMapa :: Mapa -> Int -> Mapa
 estendeMapa = undefined
 
+
+
 proximosTerrenosValidos :: Mapa -> [Terreno]
-proximosTerrenosValidos = undefined
+proximosTerrenosValidos (Mapa _ l) = 
+    let ultTerreno = fst (last l) in
+        case ultTerreno of
+            Rio _ -> rioAux (Mapa 0 l) 0
+            Estrada _ -> estradaAux (Mapa 0 l) 0
+            Relva -> relvaAux (Mapa 0 l) 0
+
+rioAux :: Mapa -> Int -> [Terreno]
+rioAux (Mapa _ []) n = [Rio 0, Estrada 0, Relva]
+rioAux (Mapa _ l) n =
+    let ultTerreno = fst (last l) in
+        case ultTerreno of
+            Rio _ -> 
+                if n < 3 then rioAux (Mapa 0 (init l)) (n+1) 
+                else [Estrada 0, Relva]
+            _ -> [Rio 0, Estrada 0, Relva]
+
+estradaAux :: Mapa -> Int -> [Terreno]
+estradaAux (Mapa _ []) n = [Rio 0, Estrada 0, Relva]
+estradaAux (Mapa _ l) n =
+    let ultTerreno = fst (last l) in
+        case ultTerreno of
+            Estrada _ -> 
+                if n < 4 then estradaAux (Mapa 0 (init l)) (n+1)
+                else [Rio 0, Relva]
+            _ -> [Rio 0, Estrada 0, Relva]
+
+relvaAux :: Mapa -> Int -> [Terreno]
+relvaAux (Mapa _ []) n = [Rio 0, Estrada 0, Relva]
+relvaAux (Mapa _ l) n =
+    let ultTerreno = fst (last l) in
+        case ultTerreno of
+            Relva ->
+                if n < 4 then relvaAux (Mapa 10 (init l)) (n+1)
+                else [Rio 0, Estrada 0]
+            _ -> [Rio 0, Estrada 0, Relva]
+
+
 
 proximosObstaculosValidos :: Int -> (Terreno, [Obstaculo]) -> [Obstaculo]
 proximosObstaculosValidos l (terr, obs) =
