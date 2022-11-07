@@ -9,9 +9,22 @@ Módulo para a realização da Tarefa 2 do projeto de LI1 em 2022/23.
 module Tarefa2_2022li1g002 where
 
 import LI12223
+import System.Random ( mkStdGen, Random(randoms) )
 
 estendeMapa :: Mapa -> Int -> Mapa
-estendeMapa = undefined
+estendeMapa (Mapa l to) seed = undefined
+
+gerarObstaculos :: [Int] 
+    -> Int -- ^largura 
+    -> Terreno
+    -> [Obstaculo]
+    -> [Obstaculo]
+gerarObstaculos [] _ _ obs = obs 
+gerarObstaculos (h:ss) l t o = let obsValidos = (proximosObstaculosValidos l (t, o)); obs = obsValidos !! (mod h (length obsValidos)) in
+        gerarObstaculos ss l t o++[obs]
+
+obterRandoms :: Int -> Int -> [Int]
+obterRandoms seed n = take n $ randoms (mkStdGen seed)
 
 proximosTerrenosValidos :: Mapa -> [Terreno]
 proximosTerrenosValidos (Mapa _ l) = 
