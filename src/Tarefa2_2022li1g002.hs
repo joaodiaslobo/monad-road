@@ -12,7 +12,11 @@ import LI12223
 import System.Random ( mkStdGen, Random(randoms) )
 
 estendeMapa :: Mapa -> Int -> Mapa
-estendeMapa (Mapa l to) seed = undefined
+estendeMapa (Mapa l to) seed =
+    let randoms = obterRandoms seed (1+l)
+        terreno = gerarTerreno (head randoms) (proximosTerrenosValidos (Mapa l to))
+        obstaculos = gerarObstaculos (tail randoms) l terreno [] in
+            Mapa l (to++[(terreno, obstaculos)])
 
 gerarObstaculos :: [Int] 
     -> Int -- ^largura 
@@ -22,6 +26,9 @@ gerarObstaculos :: [Int]
 gerarObstaculos [] _ _ obs = obs 
 gerarObstaculos (h:ss) l t o = let obsValidos = (proximosObstaculosValidos l (t, o)); obs = obsValidos !! (mod h (length obsValidos)) in
         gerarObstaculos ss l t o++[obs]
+
+gerarTerreno :: Int -> [Terreno] -> Terreno
+gerarTerreno s l = (l !! (mod s (length l)))
 
 obterRandoms :: Int -> Int -> [Int]
 obterRandoms seed n = take n $ randoms (mkStdGen seed)
@@ -63,8 +70,6 @@ relvaAux (Mapa _ l) n =
                 if n < 4 then relvaAux (Mapa 10 (init l)) (n+1)
                 else [Rio 0, Estrada 0]
             _ -> [Rio 0, Estrada 0, Relva]
-
-
 
 proximosObstaculosValidos :: Int -> (Terreno, [Obstaculo]) -> [Obstaculo]
 proximosObstaculosValidos l (terr, obs) =
