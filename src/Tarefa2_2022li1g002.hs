@@ -56,7 +56,7 @@ relvaAux (Mapa _ l) n =
 proximosObstaculosValidos :: Int -> (Terreno, [Obstaculo]) -> [Obstaculo]
 proximosObstaculosValidos l (terr, obs) =
     let cheio = length obs == l
-        ultNenhum = (length obs) + 1 == l && not (elem Nenhum obs) in
+        ultNenhum = length obs + 1 == l && notElem Nenhum obs in
         case terr of
             Relva -> if cheio then [] else 
                 if ultNenhum then [Nenhum] else
@@ -71,9 +71,9 @@ proximosObstaculosValidos l (terr, obs) =
 proximosObstaculosEstradaAux :: [Obstaculo] -> Int -> [Obstaculo]
 proximosObstaculosEstradaAux _ 3 = [Nenhum]
 proximosObstaculosEstradaAux [] _ = [Nenhum, Carro]
-proximosObstaculosEstradaAux l n = if (last l == Carro) then proximosObstaculosEstradaAux (init l) (n+1) else [Nenhum, Carro]
+proximosObstaculosEstradaAux l n = if last l == Carro then proximosObstaculosEstradaAux (init l) (n+1) else [Nenhum, Carro]
 
 proximosObstaculosRioAux :: [Obstaculo] -> Int -> [Obstaculo]
 proximosObstaculosRioAux _ 5 = [Nenhum]
 proximosObstaculosRioAux [] _ = [Nenhum, Tronco]
-proximosObstaculosRioAux l n = if (last l == Tronco) then proximosObstaculosRioAux (init l) (n+1) else [Nenhum, Tronco]
+proximosObstaculosRioAux l n = if last l == Tronco then proximosObstaculosRioAux (init l) (n+1) else [Nenhum, Tronco]
