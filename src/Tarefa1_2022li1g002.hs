@@ -17,12 +17,12 @@ mapaValido (Mapa l t) = mapaValidoAnaliseLinhas (Mapa l t) && mapaValidoAnaliseG
 mapaValidoAnaliseLinhas :: Mapa -> Bool
 mapaValidoAnaliseLinhas (Mapa _ []) = True
 mapaValidoAnaliseLinhas (Mapa l (h:t)) = 
-    let linha = (snd h) in 
+    let linha = snd h in 
         (terrObsValidos h && quantObsValida l linha && existeNenhum linha && dimensObsValida linha) && mapaValidoAnaliseLinhas (Mapa l t)
  
 mapaValidoAnaliseGeral :: Mapa -> Bool
-mapaValidoAnaliseGeral (Mapa l (li)) = 
-    let terrenos = (unzipperTerreno li) in 
+mapaValidoAnaliseGeral (Mapa l li) = 
+    let terrenos = unzipperTerreno li in 
         riosContiguosVelocidades terrenos && contaRios terrenos 0 && contaEstradas terrenos 0 && contaRelvas terrenos 0
  
 terrObsValidos :: (Terreno, [Obstaculo]) -> Bool
@@ -42,7 +42,7 @@ obstaculoEmTerrenoValido _ _ = False
  
 riosContiguosVelocidades :: [Terreno] -> Bool
 riosContiguosVelocidades [] = True
-riosContiguosVelocidades ((Rio v1):(Rio v2):t) = velocidadesInversas (v1,v2) && (riosContiguosVelocidades ((Rio v2):t))
+riosContiguosVelocidades ((Rio v1):(Rio v2):t) = velocidadesInversas (v1,v2) && riosContiguosVelocidades (Rio v2:t)
 riosContiguosVelocidades (h:t) = riosContiguosVelocidades t
  
 velocidadesInversas :: (Velocidade,Velocidade) -> Bool
@@ -51,18 +51,18 @@ velocidadesInversas (v1,v2)
     | otherwise = False
  
 dimensObsValida :: [Obstaculo] -> Bool
-dimensObsValida l = (contaTroncos l 0) && (contaCarros l 0)
+dimensObsValida l = contaTroncos l 0 && contaCarros l 0
  
 contaTroncos :: [Obstaculo] -> Int -> Bool
 contaTroncos [] n = True
-contaTroncos ((Tronco):t) n
+contaTroncos (Tronco:t) n
     | n + 1 > 5 = False
     | otherwise = contaTroncos t (n+1)
 contaTroncos (_:t) n = contaTroncos t 0
  
 contaCarros :: [Obstaculo] -> Int -> Bool
 contaCarros [] n = True
-contaCarros ((Carro):t) n
+contaCarros (Carro:t) n
     | n + 1 > 3 = False
     | otherwise = contaCarros t (n+1)
 contaCarros (_:t) n = contaCarros t 0
@@ -86,7 +86,7 @@ contaRios (_:t) n = contaRios t 0
  
 contaRelvas :: [Terreno] -> Int -> Bool
 contaRelvas [] n = True
-contaRelvas ((Relva):t) n
+contaRelvas (Relva:t) n
     | n + 1 > 5 = False
     | otherwise = contaRelvas t (n+1)
 contaRelvas (_:t) n = contaRelvas t 0

@@ -13,8 +13,6 @@ import LI12223
 estendeMapa :: Mapa -> Int -> Mapa
 estendeMapa = undefined
 
-
-
 proximosTerrenosValidos :: Mapa -> [Terreno]
 proximosTerrenosValidos (Mapa _ l) = 
     let ultTerreno = fst (last l) in
