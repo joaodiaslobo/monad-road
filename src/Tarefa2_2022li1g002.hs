@@ -38,7 +38,7 @@ gerarObstaculos :: [Int] -- ^Lista de números gerados aleatoriamente.
     -> [Obstaculo] -- ^Obstáculos gerados específicos para a nova linha.
 gerarObstaculos [] _ _ obs = obs 
 gerarObstaculos (h:ss) l t o = let obsValidos = (proximosObstaculosValidos l (t, o)); obs = obsValidos !! (mod h (length obsValidos)) in
-        gerarObstaculos ss l t o++[obs]
+        gerarObstaculos ss l t (o++[obs])
 
 {- | A função __não recursiva__ 'gerarTerreno' recebe um inteiro, a cabeça da lista de inteiros gerados aleatoriamente, e ainda uma lista com todos os tipos de terreno possíveis. Assim, a função irá devolver um tipo de terreno, o qual será aplicado na nova linha a adicionar ao mapa inicial.-}
 gerarTerreno :: Int -- ^Primeiro número gerado que irá ser aplicado para descobrir qual o tipo de terreno escolhido aleatoriamente.
