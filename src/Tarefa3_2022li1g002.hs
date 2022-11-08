@@ -11,4 +11,19 @@ module Tarefa3_2022li1g002 where
 import LI12223
 
 animaJogo :: Jogo -> Jogada -> Jogo
-animaJogo = undefined
+animaJogo (Jogo p (Mapa l ls)) j = undefined
+
+animaObstaculos :: [(Terreno, [Obstaculo])] -> [(Terreno, [Obstaculo])]
+animaObstaculos [] = []
+animaObstaculos (l:t) = 
+    case fst l of
+        Relva -> l:animaObstaculos t
+        Rio v -> (Rio v, animaObstaculoAux v (snd l) 0):animaObstaculos t
+        Estrada v -> (Estrada v, animaObstaculoAux v (snd l) 0):animaObstaculos t
+
+animaObstaculoAux :: Velocidade -> [Obstaculo] -> Int -> [Obstaculo]
+animaObstaculoAux v o n
+    | v > 0 =
+        if n < v then animaObstaculoAux v (last o:init o) (n+1) else o
+    | v < 0 =
+        if n < abs v then animaObstaculoAux v (tail o++[head o]) (n+1) else o
