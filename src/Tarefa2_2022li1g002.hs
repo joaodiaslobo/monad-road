@@ -66,7 +66,7 @@ proximosTerrenosValidos (Mapa _ l) r =
     let ultTerreno = fst (last l)
         velocidade = geraVelocidade r in
         case ultTerreno of
-            Rio _ -> rioAux (Mapa 0 l) 0 velocidade
+            Rio x ->  if x < 0 then rioAux (Mapa 0 l) 0 (abs velocidade) else rioAux (Mapa 0 l) 0 (-(abs velocidade))             
             Estrada _ -> estradaAux (Mapa 0 l) 0 velocidade
             Relva -> relvaAux (Mapa 0 l) 0 velocidade
 
