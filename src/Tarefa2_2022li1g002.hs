@@ -26,7 +26,7 @@ estendeMapa :: Mapa -- ^Mapa antecedente da nova linha.
     -> Mapa -- ^Mapa com a nova linha.
 estendeMapa (Mapa l to) seed =
     let randoms = obterRandoms seed (1+l)
-        terreno = gerarTerreno (head randoms) (proximosTerrenosValidos (Mapa l to))
+        terreno = gerarTerreno (head randoms) (proximosTerrenosValidos (Mapa l to) (head randoms))
         obstaculos = gerarObstaculos (tail randoms) l terreno [] in
             Mapa l (to++[(terreno, obstaculos)])
 
@@ -58,52 +58,62 @@ obterRandoms seed n = take n $ randoms (mkStdGen seed)
 >>>proximosTerrenosValidos (Mapa 5 [(Relva, [Arvore, Nenhum, Arvore, Nenhum, Arvore]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])])
 -}
 proximosTerrenosValidos :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
+    -> Int -- ^Número pseudo aleatório que vai ser usado para gerar uma velocidade (para terrenos rio e estrada).
     -> [Terreno] -- ^Lista de terrenos válidos que podem pertencer à nova linha a adicionar.
-proximosTerrenosValidos (Mapa _ l) = 
-    let ultTerreno = fst (last l) in
+proximosTerrenosValidos (Mapa _ l) r = 
+    let ultTerreno = fst (last l)
+        velocidade = geraVelocidade r in
         case ultTerreno of
-            Rio _ -> rioAux (Mapa 0 l) 0
-            Estrada _ -> estradaAux (Mapa 0 l) 0
-            Relva -> relvaAux (Mapa 0 l) 0
+            Rio _ -> rioAux (Mapa 0 l) 0 velocidade
+            Estrada _ -> estradaAux (Mapa 0 l) 0 velocidade
+            Relva -> relvaAux (Mapa 0 l) 0 velocidade
+
+geraVelocidade :: Int -> Velocidade
+geraVelocidade r = let vel = (mod (floor (sqrt (abs (fromIntegral r)))) (c-f+1) + f) in 
+    if even r then -vel else vel
+    where (f,c) = velocidadeMaxMin
 
 {- | A função __recursiva__ 'rioAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é um rio e quais é que são os tipos de terreno das linhas que precedem esta.-}
 rioAux :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
     -> Int -- ^Contador.
+    -> Velocidade -- ^Velocidade caso seja necessária.
     -> [Terreno] -- ^Lista de terrenos válidos que podem pertencer à nova linha a adicionar quando a última linha tem como terreno um rio.
-rioAux (Mapa _ []) n = [Rio 0, Estrada 0, Relva]
-rioAux (Mapa _ l) n =
+rioAux (Mapa _ []) n v = [Rio v, Estrada v, Relva]
+rioAux (Mapa _ l) n v =
     let ultTerreno = fst (last l) in
         case ultTerreno of
             Rio _ -> 
-                if n < 3 then rioAux (Mapa 0 (init l)) (n+1) 
-                else [Estrada 0, Relva]
-            _ -> [Rio 0, Estrada 0, Relva]
+                if n < 3 then rioAux (Mapa 0 (init l)) (n+1) v
+                else [Estrada v, Relva]
+            _ -> [Rio v, Estrada v, Relva]
 
 {- | A função __recursiva__ 'estradaAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é uma estrada e quais é que são os tipos de terreno das linhas que precedem esta.-}
 estradaAux :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
     -> Int -- ^Contador.
+    -> Velocidade -- ^Velocidade caso seja necessária.
     -> [Terreno] -- ^Lista de terrenos válidos que podem pertencer à nova linha a adicionar quando a última linha tem como terreno uma estrada.
-estradaAux (Mapa _ []) n = [Rio 0, Estrada 0, Relva]
-estradaAux (Mapa _ l) n =
+estradaAux (Mapa _ []) n v = [Rio v, Estrada v, Relva]
+estradaAux (Mapa _ l) n  v =
     let ultTerreno = fst (last l) in
         case ultTerreno of
             Estrada _ -> 
-                if n < 4 then estradaAux (Mapa 0 (init l)) (n+1)
-                else [Rio 0, Relva]
-            _ -> [Rio 0, Estrada 0, Relva]
+                if n < 4 then estradaAux (Mapa 0 (init l)) (n+1) v
+                else [Rio v, Relva]
+            _ -> [Rio v, Estrada v, Relva]
 
 {- | A função __recursiva__ 'relvaAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é relva e quais é que são os tipos de terreno das linhas que precedem esta.-}
 relvaAux :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
     -> Int -- ^Contador.
+    -> Velocidade -- ^Velocidade caso seja necessária.
     -> [Terreno] -- ^Lista de terrenos válidos que podem pertencer à nova linha a adicionar quando a última linha tem como terreno relva.
-relvaAux (Mapa _ []) n = [Rio 0, Estrada 0, Relva]
-relvaAux (Mapa _ l) n =
+relvaAux (Mapa _ []) n v = [Rio v, Estrada v, Relva]
+relvaAux (Mapa _ l) n v =
     let ultTerreno = fst (last l) in
         case ultTerreno of
             Relva ->
-                if n < 4 then relvaAux (Mapa 10 (init l)) (n+1)
-                else [Rio 0, Estrada 0]
-            _ -> [Rio 0, Estrada 0, Relva]
+                if n < 4 then relvaAux (Mapa 10 (init l)) (n+1) v
+                else [Rio v, Estrada v]
+            _ -> [Rio v, Estrada v, Relva]
 
 {- | A função __não recursiva__ 'proximosObstaculosValidos' recebe a largura do mapa a prolongar e uma linha do mapa, devolvendo uma lista de obstáculos possíveis para a nova linha tendo em conta o tipo de terreno da mesma.
 
@@ -142,3 +152,5 @@ proximosObstaculosRioAux :: [Obstaculo] -- ^Lista de obstáculos de uma linha do
 proximosObstaculosRioAux _ 5 = [Nenhum]
 proximosObstaculosRioAux [] _ = [Nenhum, Tronco]
 proximosObstaculosRioAux l n = if last l == Tronco then proximosObstaculosRioAux (init l) (n+1) else [Nenhum, Tronco]
+
+velocidadeMaxMin = (1, 3)
