@@ -11,7 +11,20 @@ module Tarefa3_2022li1g002 where
 import LI12223
 
 animaJogo :: Jogo -> Jogada -> Jogo
-animaJogo (Jogo p (Mapa l ls)) j = undefined
+animaJogo (Jogo p (Mapa l ls)) j = Jogo jogador (Mapa l linhas)
+    where jogador = moveJogador p j ls; linhas = animaObstaculos ls
+
+moveJogador :: Jogador -> Jogada -> [(Terreno, [Obstaculo])] -> Jogador
+moveJogador (Jogador (x,y)) j p =
+    case j of
+        Parado ->
+            case fst (p !! y) of
+                Rio v -> if (snd (p !! y) !! x) == Tronco then Jogador (x+v,y) else Jogador (x,y)
+                _ -> Jogador (x,y)
+        Move Cima -> if  (y+1 >= length p) || ((snd (p !! (y+1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y+1)
+        Move Baixo -> if (y-1 < 0) || ((snd (p !! (y-1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y-1)
+        Move Direita -> if (x+1 >= length (snd (head p))) || (snd (p !! y) !! (x+1)) == Arvore then Jogador (x,y) else Jogador (x+1,y)
+        Move Esquerda -> if (x-1 < 0) || (snd (p !! y) !! (x-1)) == Arvore then Jogador (x,y) else Jogador (x-1,y)
 
 animaObstaculos :: [(Terreno, [Obstaculo])] -> [(Terreno, [Obstaculo])]
 animaObstaculos [] = []
