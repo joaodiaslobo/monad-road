@@ -17,9 +17,10 @@ import System.Random ( mkStdGen, Random(randoms) )
 Através da seed recebida como argumento, a função 'obterRandoms' gera uma lista com números de 19 dígitos.
 O tamanho desta lista corresponde à largura do mapa mais uma unidade. A 'head' da lista é usada para gerar o terreno, já os restantes elementos são utilizados para gerar os obstáculos.
 
-=== Exemplos de utilização:
+=== Exemplo de utilização:
 
 >>>estendeMapa (Mapa 5 [(Relva, [Arvore, Nenhum, Arvore, Nenhum, Arvore]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])])
+Mapa 5 [(Relva, [Arvore, Nenhum, Arvore, Nenhum, Arvore]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore]),(Rio, [Nenhum, Tronco, Tronco, Nenhum, Tronco])]
 -}
 estendeMapa :: Mapa -- ^Mapa antecedente da nova linha.
     -> Int -- ^Seed.
@@ -30,7 +31,7 @@ estendeMapa (Mapa l to) seed =
         obstaculos = gerarObstaculos (tail randoms) l terreno [] in
             Mapa l (to++[(terreno, obstaculos)])
 
-{- | A função __recursiva__ 'gerarObstaculos' recebe a lista de inteiros criada pela função 'obterRandoms', a largura do mapa, o terreno da nova linha e os possíveis obstáculos para o mesmo. A função irá devolver uma lista com todos os obstáculos a introduzir nessa nova linha, de um certo tipo de terreno.-}
+{- | A função __recursiva__ 'gerarObstaculos' recebe a lista de inteiros criada pela função auxiliar 'obterRandoms', a largura do mapa, o terreno da nova linha e os possíveis obstáculos para o mesmo. A função irá devolver uma lista com todos os obstáculos a introduzir nessa nova linha, de um certo tipo de terreno.-}
 gerarObstaculos :: [Int] -- ^Lista de números gerados aleatoriamente. 
     -> Int -- ^Largura do mapa que irá ser prolongado. 
     -> Terreno -- ^Tipo de terreno para o qual se gerará obstáculos.
@@ -40,7 +41,7 @@ gerarObstaculos [] _ _ obs = obs
 gerarObstaculos (h:ss) l t o = let obsValidos = (proximosObstaculosValidos l (t, o)); obs = obsValidos !! (mod h (length obsValidos)) in
         gerarObstaculos ss l t (o++[obs])
 
-{- | A função __não recursiva__ 'gerarTerreno' recebe um inteiro, a cabeça da lista de inteiros gerados aleatoriamente, e ainda uma lista com todos os tipos de terreno possíveis. Assim, a função irá devolver um tipo de terreno, o qual será aplicado na nova linha a adicionar ao mapa inicial.-}
+{- | A função __não recursiva__ 'gerarTerreno' recebe um inteiro, a cabeça da lista de inteiros gerados aleatoriamente pela função auxiliar 'obterRandoms', e ainda uma lista com todos os tipos de terreno possíveis. Assim, a função irá devolver um tipo de terreno, o qual será aplicado na nova linha a adicionar ao mapa inicial.-}
 gerarTerreno :: Int -- ^Primeiro número gerado que irá ser aplicado para descobrir qual o tipo de terreno escolhido aleatoriamente.
     -> [Terreno] -- ^Lista com os tipos de terreno possíveis da qual se escolherá um aleatoriamente.
     -> Terreno -- ^Terreno escolhido aleatoriamente.
@@ -52,10 +53,11 @@ obterRandoms :: Int -- ^Seed.
     -> [Int] -- ^Lista de números gerados aleatoriamente.
 obterRandoms seed n = take n $ randoms (mkStdGen seed)
 
-{- | A função __não recursiva__ 'proximosTerrenosValidos' recebe o mapa a prolongar e irá devolver uma lista de terrenos válidos para a nova linha, tendo já sido previamente aplicadas as condições necessárias do jogo, analisadas pelas funções 'rioAux', 'estradaAux' e 'relvaAux'.
+{- | A função __não recursiva__ 'proximosTerrenosValidos' recebe o mapa a prolongar e irá devolver uma lista de terrenos válidos para a nova linha, tendo já sido previamente aplicadas as condições necessárias do jogo, analisadas pelas funções auxiliares 'rioAux', 'estradaAux' e 'relvaAux'.
 
-=== Exemplos de utilização:
+=== Exemplo de utilização:
 >>>proximosTerrenosValidos (Mapa 5 [(Relva, [Arvore, Nenhum, Arvore, Nenhum, Arvore]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])])
+[Rio 0, Estrada 0, Relva]
 -}
 proximosTerrenosValidos :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
     -> Int -- ^Número pseudo aleatório que vai ser usado para gerar uma velocidade (para terrenos rio e estrada).
@@ -68,12 +70,13 @@ proximosTerrenosValidos (Mapa _ l) r =
             Estrada _ -> estradaAux (Mapa 0 l) 0 velocidade
             Relva -> relvaAux (Mapa 0 l) 0 velocidade
 
+{- | A função __não recursiva__ 'geraVelocidade' é um algoritmo pseudo-aleatório para gerar a velocidade de um rio ou estrada.-}
 geraVelocidade :: Int -> Velocidade
 geraVelocidade r = let vel = (mod (floor (sqrt (abs (fromIntegral r)))) (c-f+1) + f) in 
     if even r then -vel else vel
     where (f,c) = velocidadeMaxMin
 
-{- | A função __recursiva__ 'rioAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é um rio e quais é que são os tipos de terreno das linhas que precedem esta.-}
+{- | A função __recursiva__ 'rioAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é um rio e os tipos de terreno das linhas que precedem esta.-}
 rioAux :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
     -> Int -- ^Contador.
     -> Velocidade -- ^Velocidade caso seja necessária.
@@ -87,7 +90,7 @@ rioAux (Mapa _ l) n v =
                 else [Estrada v, Relva]
             _ -> [Rio v, Estrada v, Relva]
 
-{- | A função __recursiva__ 'estradaAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é uma estrada e quais é que são os tipos de terreno das linhas que precedem esta.-}
+{- | A função __recursiva__ 'estradaAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é uma estrada e os tipos de terreno das linhas que precedem esta.-}
 estradaAux :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
     -> Int -- ^Contador.
     -> Velocidade -- ^Velocidade caso seja necessária.
@@ -101,7 +104,7 @@ estradaAux (Mapa _ l) n  v =
                 else [Rio v, Relva]
             _ -> [Rio v, Estrada v, Relva]
 
-{- | A função __recursiva__ 'relvaAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é relva e quais é que são os tipos de terreno das linhas que precedem esta.-}
+{- | A função __recursiva__ 'relvaAux' recebe o mapa a prolongar e um inteiro, que irá funcionar como contador, devolvendo a lista de terrenos válidos para aplicar na nova linha, tendo em conta que a linha anterior é relva e os tipos de terreno das linhas que precedem esta.-}
 relvaAux :: Mapa -- ^Mapa antecedente à nova linha, ou seja, a prolongar.
     -> Int -- ^Contador.
     -> Velocidade -- ^Velocidade caso seja necessária.
@@ -115,10 +118,11 @@ relvaAux (Mapa _ l) n v =
                 else [Rio v, Estrada v]
             _ -> [Rio v, Estrada v, Relva]
 
-{- | A função __não recursiva__ 'proximosObstaculosValidos' recebe a largura do mapa a prolongar e uma linha do mapa, devolvendo uma lista de obstáculos possíveis para a nova linha tendo em conta o tipo de terreno da mesma.
+{- | A função __não recursiva__ 'proximosObstaculosValidos' recebe a largura do mapa a prolongar e uma linha do mapa, devolvendo uma lista de obstáculos possíveis para preencher a lista dos mesmos da nova linha tendo em conta o tipo de terreno da mesma, utilizando as funções auxiliares 'proximosObstaculosEstradaAux' e 'proximosObstaculosRioAux'.
 
-=== Exemplos de utilização:
->>>proximosObstaculosValidos (Mapa 5 [(Relva, [Arvore, Nenhum, Arvore, Nenhum, Arvore]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])])
+=== Exemplo de utilização:
+>>>proximosObstaculosValidos 5 (Relva, [Arvore, Nenhum, Arvore, Nenhum])
+[Nenhum, Arvore]
 -}
 proximosObstaculosValidos :: Int -- ^Largura do mapa a prolongar.
     -> (Terreno, [Obstaculo]) -- ^Par constituído pelo tipo de terreno e por lista de obstáculos que descreve uma linha do mapa.
@@ -137,7 +141,7 @@ proximosObstaculosValidos l (terr, obs) =
                 if ultNenhum then [Nenhum] else
                     proximosObstaculosRioAux obs 0
 
-{- | A função __recursiva__ 'proximosObstaculosEstradaAux' recebe uma lista de obstáculos e um inteiro, que irá funcionar como contador, devolvendo uma lista de obstáculos possíveis para a nova linha tendo em conta que o seu terreno será uma estrada.-}
+{- | A função __recursiva__ 'proximosObstaculosEstradaAux' recebe uma lista de obstáculos e um inteiro, que irá funcionar como contador, devolvendo uma lista de obstáculos possíveis de acrescentar tendo em conta os obstáculos anteriores e que o terreno é uma estrada.-}
 proximosObstaculosEstradaAux :: [Obstaculo] -- ^Lista de obstáculos de uma linha do mapa a prolongar se o terreno for estrada.
     -> Int -- ^Contador.
     -> [Obstaculo] -- ^Lista de obstáculos possíveis para uma estrada verificando as condições necessárias exigidas.
@@ -145,7 +149,7 @@ proximosObstaculosEstradaAux _ 3 = [Nenhum]
 proximosObstaculosEstradaAux [] _ = [Nenhum, Carro]
 proximosObstaculosEstradaAux l n = if last l == Carro then proximosObstaculosEstradaAux (init l) (n+1) else [Nenhum, Carro]
 
-{- | A função __recursiva__ 'proximosObstaculosEstradaAux' recebe uma lista de obstáculos e um inteiro, que irá funcionar como contador, devolvendo uma lista de obstáculos possíveis para a nova linha tendo em conta que o seu terreno será um rio.-}
+{- | A função __recursiva__ 'proximosObstaculosEstradaAux' recebe uma lista de obstáculos e um inteiro, que irá funcionar como contador, devolvendo uma lista de obstáculos possíveis de acrescentar tendo em conta os obstáculos anteriores e que o seu terreno será um rio.-}
 proximosObstaculosRioAux :: [Obstaculo] -- ^Lista de obstáculos de uma linha do mapa a prolongar se o terreno for rio.
     -> Int -- ^Contador.
     -> [Obstaculo] -- ^Lista de obstáculos possíveis para um rio verificando as condições necessárias exigidas.
