@@ -30,7 +30,7 @@ animaObstaculos :: [(Terreno, [Obstaculo])] -> [(Terreno, [Obstaculo])]
 animaObstaculos [] = []
 animaObstaculos (l:t) = 
     case fst l of
-        Relva -> l:animaObstaculos t
+        Relva -> l:t
         Rio v -> (Rio v, animaObstaculoAux v (snd l) 0):animaObstaculos t
         Estrada v -> (Estrada v, animaObstaculoAux v (snd l) 0):animaObstaculos t
 
