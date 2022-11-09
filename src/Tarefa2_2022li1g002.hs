@@ -27,9 +27,9 @@ estendeMapa :: Mapa -- ^Mapa antecedente da nova linha.
     -> Mapa -- ^Mapa com a nova linha.
 estendeMapa (Mapa l to) seed =
     let randoms = obterRandoms seed (1+l)
-        terreno = gerarTerreno (head randoms) (proximosTerrenosValidos (Mapa l to) (head randoms))
+        terreno = gerarTerreno (head randoms) (proximosTerrenosValidos (Mapa l (reverse to)) (head randoms))
         obstaculos = gerarObstaculos (tail randoms) l terreno [] in
-            Mapa l (to++[(terreno, obstaculos)])
+            Mapa l ((terreno, obstaculos):to)
 
 {- | A função __recursiva__ 'gerarObstaculos' recebe a lista de inteiros criada pela função auxiliar 'obterRandoms', a largura do mapa, o terreno da nova linha e os possíveis obstáculos para o mesmo. A função irá devolver uma lista com todos os obstáculos a introduzir nessa nova linha, de um certo tipo de terreno.-}
 gerarObstaculos :: [Int] -- ^Lista de números gerados aleatoriamente. 

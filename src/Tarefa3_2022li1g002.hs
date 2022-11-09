@@ -21,8 +21,8 @@ moveJogador (Jogador (x,y)) j p =
             case fst (p !! y) of
                 Rio v -> if (snd (p !! y) !! x) == Tronco then Jogador (x+v,y) else Jogador (x,y)
                 _ -> Jogador (x,y)
-        Move Cima -> if  (y+1 >= length p) || ((snd (p !! (y+1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y+1)
-        Move Baixo -> if (y-1 < 0) || ((snd (p !! (y-1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y-1)
+        Move Cima -> if  (y-1 < 0) || ((snd (p !! (y-1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y-1)
+        Move Baixo -> if (y+1 >= length p) || ((snd (p !! (y+1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y+1)
         Move Direita -> if (x+1 >= length (snd (head p))) || (snd (p !! y) !! (x+1)) == Arvore then Jogador (x,y) else Jogador (x+1,y)
         Move Esquerda -> if (x-1 < 0) || (snd (p !! y) !! (x-1)) == Arvore then Jogador (x,y) else Jogador (x-1,y)
 
