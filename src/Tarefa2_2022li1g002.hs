@@ -141,13 +141,20 @@ proximosObstaculosValidos l (terr, obs) =
                 if ultNenhum then [Nenhum] else if length obs + 1 == l then ultimoObstaculoCaso (Rio 0) obs else
                     proximosObstaculosRioAux obs 0
 
-ultimoObstaculoCaso :: Terreno -> [Obstaculo] -> [Obstaculo]
+{- | A função __não recursiva__ 'ultimoObstaculoCaso' foi implementada para evitar um caso de repetição de obstáculos. Quando estão a ser escolhidos os próximos obstáculos válidos para uma linha, é preciso ter em conta os obstáculos no início da mesma, pois sem esta função, como a linha se move colocando o último elemento no início da lista (velocidade positiva) ou o primeiro elemento no final da lista (velocidade negativa), em alguns casos as dimensões dos obstáculos podem ultrapassar os limites definidos sabendo que podem ser constituídos por elementos no início e no fim da lista, estando no processo de entrada na outra ponta da lista. -}
+ultimoObstaculoCaso :: Terreno -- ^Terreno onde o obstáculo está a ser gerado.
+    -> [Obstaculo] -- ^Estado da linha antes de adicionar o obstáculo.
+    -> [Obstaculo] -- ^Lista de obstáculos válidos.
 ultimoObstaculoCaso terr obs =
     case terr of
         Estrada _ -> if contaPrimeirasUltimasOcorrencias obs Carro True + contaPrimeirasUltimasOcorrencias obs Carro False >= 3 then [Nenhum] else [Nenhum,Carro] 
         _ -> if contaPrimeirasUltimasOcorrencias obs Tronco True + contaPrimeirasUltimasOcorrencias obs Tronco False >= 5 then [Nenhum] else [Nenhum,Tronco] 
 
-contaPrimeirasUltimasOcorrencias :: Eq a => [a] -> a -> Bool -> Int
+{- | A função 'contaPrimeirasUltimasOcorrencias', dependendo do argumento 'Bool', calcula o número de ocorrências iniciais ou finais de um elemento numa lista. -}
+contaPrimeirasUltimasOcorrencias :: Eq a => [a] -- ^Lista de um elemento genérico. 
+    -> a -- ^Elemento genérico a ser contado.
+    -> Bool -- ^Argumento booleano que define se se deve estudar os elementos finais ou iniciais.
+    -> Int -- ^Número de ocorrências iniciais ou finais de um dado elementi 
 contaPrimeirasUltimasOcorrencias [] _ _ = 0
 contaPrimeirasUltimasOcorrencias (h:t) e True = if h == e then 1 + contaPrimeirasUltimasOcorrencias t e True else 0 
 contaPrimeirasUltimasOcorrencias l e False = if last l == e then 1 + contaPrimeirasUltimasOcorrencias (init l) e False else 0 
