@@ -17,19 +17,19 @@ import LI12223
 
 === Exemplos de utilização:
 
->>>(Jogo (Jogador (2,0)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
+>>>jogoTerminou (Jogo (Jogador (2,0)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
 True
 
->>>(Jogo (Jogador (0,0)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
+>>>jogoTerminou (Jogo (Jogador (0,0)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
 False
 
->>>(Jogo (Jogador (5,1)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
+>>>jogoTerminou (Jogo (Jogador (4,1)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
 True
 
->>>(Jogo (Jogador (2,1)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
+>>>jogoTerminou (Jogo (Jogador (2,1)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
 False
 
->>>(Jogo (Jogador (6,4)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
+>>>jogoTerminou (Jogo (Jogador (6,4)) (Mapa 5 [(Rio 3, [Tronco, Nenhum, Nenhum, Tronco, Tronco]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore])]))
 True
 -}
 
