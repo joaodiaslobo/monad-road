@@ -9,7 +9,7 @@ Módulo para a realização da Tarefa 4 do projeto de LI1 em 2022/23.
 module Tarefa4_2022li1g002 where
 
 import LI12223
-{- | A função __não recursiva__ 'jogoTerminou' irá devolver-nos um Bool, que dará o valor de verdade da afirmação presente no próprio nome da função, necessitando então a mesma de receber um dado Jogo. O objetivo desta função é, através de certas condições impostas, verificar se o jogador perdeu e, consequentemente, se o jogo terminou. Caso contrário, o jogo continua, pois o jogador não cometeu nenhuma das seguintes condições:
+{- | A função __não recursiva__ 'jogoTerminou' irá devolver-nos um 'Bool', que dará o valor de verdade da afirmação presente no próprio nome da função, necessitando então a mesma de receber um dado Jogo. O objetivo desta função é, através de certas condições impostas, verificar se o jogador perdeu e, consequentemente, se o jogo terminou. Caso contrário, o jogo continua, pois o jogador não cometeu nenhuma das seguintes infrações:
 
 * O jogador encontra-se fora do mapa
 * O jogador encontra-se na água
