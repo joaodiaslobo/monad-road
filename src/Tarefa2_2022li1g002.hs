@@ -135,11 +135,22 @@ proximosObstaculosValidos l (terr, obs) =
                 if ultNenhum then [Nenhum] else
                     [Nenhum, Arvore]
             Estrada _ -> if cheio then [] else
-                if ultNenhum then [Nenhum] else
+                if ultNenhum then [Nenhum] else if length obs + 1 == l then ultimoObstaculoCaso (Estrada 0) obs else
                     proximosObstaculosEstradaAux obs 0
             Rio _ -> if cheio then [] else 
-                if ultNenhum then [Nenhum] else
+                if ultNenhum then [Nenhum] else if length obs + 1 == l then ultimoObstaculoCaso (Rio 0) obs else
                     proximosObstaculosRioAux obs 0
+
+ultimoObstaculoCaso :: Terreno -> [Obstaculo] -> [Obstaculo]
+ultimoObstaculoCaso terr obs =
+    case terr of
+        Estrada _ -> if contaPrimeirasUltimasOcorrencias obs Carro True + contaPrimeirasUltimasOcorrencias obs Carro False >= 3 then [Nenhum] else [Nenhum,Carro] 
+        _ -> if contaPrimeirasUltimasOcorrencias obs Tronco True + contaPrimeirasUltimasOcorrencias obs Tronco False >= 5 then [Nenhum] else [Nenhum,Tronco] 
+
+contaPrimeirasUltimasOcorrencias :: Eq a => [a] -> a -> Bool -> Int
+contaPrimeirasUltimasOcorrencias [] _ _ = 0
+contaPrimeirasUltimasOcorrencias (h:t) e True = if h == e then 1 + contaPrimeirasUltimasOcorrencias t e True else 0 
+contaPrimeirasUltimasOcorrencias l e False = if last l == e then 1 + contaPrimeirasUltimasOcorrencias (init l) e False else 0 
 
 {- | A função __recursiva__ 'proximosObstaculosEstradaAux' recebe uma lista de obstáculos e um inteiro, que irá funcionar como contador, devolvendo uma lista de obstáculos possíveis de acrescentar tendo em conta os obstáculos anteriores e que o terreno é uma estrada.-}
 proximosObstaculosEstradaAux :: [Obstaculo] -- ^Lista de obstáculos de uma linha do mapa a prolongar se o terreno for estrada.
