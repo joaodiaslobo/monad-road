@@ -84,3 +84,4 @@ animaObstaculoAux v o n
         if n < v then animaObstaculoAux v (last o:init o) (n+1) else o
     | v < 0 =
         if n < abs v then animaObstaculoAux v (tail o++[head o]) (n+1) else o
+    | otherwise = o
