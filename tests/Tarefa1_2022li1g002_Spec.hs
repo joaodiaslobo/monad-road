@@ -24,7 +24,7 @@ testsT1 = TestLabel "Testes Tarefa 1" $ test (testsMapaValido++testsTerrObsValid
 
 testsMapaValido = [
     TestCase (assertBool "Teste para o exemplo dado na quarta página do primeiro guião" (mapaValido mapaTeste01)),
-    TestCase (assertBool "Teste para um mapa de onze linhas e vários obstáculos" (mapaValido mapaTeste01)),
+    TestCase (assertBool "Teste para um mapa de onze linhas e vários obstáculos" (mapaValido mapaTeste02)),
     TestCase (assertBool "Teste para um mapa vazio" (not (mapaValido (Mapa 2 []))))
     ]
 

@@ -11,7 +11,7 @@ module Tarefa2_2022li1g002 where
 import LI12223
 import System.Random ( mkStdGen, Random(randoms) )
 
-{- | A função __não recursiva__ 'estendeMapa' recebe um mapa e uma seed /(um número de 1 a 100 usado para gerar os números aleatórios)/.
+{- | A função __não recursiva__ 'estendeMapa' recebe um mapa e uma seed /(um número de 1 a 100 usado para gerar os números aleatórios)/. Quando o mapa passado no primeiro argumento não tem linhas assumimos que esta vai ser a linha que inicia o mapa e retornamos uma linha de terreno relva sem obstáculos.
 
 === Funcionamento da aleatoriedade:
 Através da seed recebida como argumento, a função 'obterRandoms' gera uma lista com números de 19 dígitos.
@@ -25,6 +25,7 @@ Mapa 5 [(Relva, [Arvore, Nenhum, Arvore, Nenhum, Arvore]),(Estrada (-1), [Nenhum
 estendeMapa :: Mapa -- ^Mapa antecedente da nova linha.
     -> Int -- ^Seed.
     -> Mapa -- ^Mapa com a nova linha.
+estendeMapa (Mapa l []) _ = Mapa l [(Relva, replicate l Nenhum)] 
 estendeMapa (Mapa l to) seed =
     let randoms = obterRandoms seed (1+l)
         terreno = gerarTerreno (head randoms) (proximosTerrenosValidos (Mapa l (reverse to)) (head randoms))
