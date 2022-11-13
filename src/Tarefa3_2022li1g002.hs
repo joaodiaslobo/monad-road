@@ -10,7 +10,7 @@ module Tarefa3_2022li1g002 where
 
 import LI12223
 
-{- | A função __não recursiva__ 'animaJogo' movimenta os obstáculos (de acordo com a velocidade) do terreno em que se encontram), e o personagem, de acordo com a jogada dada.
+{- | A função __não recursiva__ 'animaJogo' movimenta os obstáculos (de acordo com a velocidade do terreno em que se encontram) e a personagem, de acordo com a jogada dada.
 
 === Exemplo de utilização:
 
@@ -26,8 +26,9 @@ animaJogo (Jogo p (Mapa l ls)) j = Jogo jogador (Mapa l linhas)
 {- | A função __não recursiva__ 'moveJogador' recebe 'Jogador' com as 'Coordenadas' antes das execução da função, uma 'Jogada' e a lista de linhas do mapa. Para o jogador se mover, têm de ser respeitadas as seguintes condições:
 
 * O jogador __não__ pode sair do mapa (exceto quando está num tronco)
-* O jogador __não__ pode ir para "cima" de árvores, ou seja, quando há uma árvore no caminho do jogador este fica parado no lugar
-* Quando a jogada é parado e o jogador se encontra na posição do tronco, este move-se junto com o tronco (|v| unidades na direção do rio)
+* O jogador __não__ pode ir para "cima" de árvores, ou seja, quando há uma árvore no caminho do jogador este fica parado no lugar inicial
+* Quando a jogada é 'Parado' e o jogador se encontra na posição do tronco, este move-se junto com o tronco (|v| unidades na direção do rio)
+* Quando o jogador se move horizontalmente e se encontra num tronco, a sua posição resultante em x será a soma do vetor v com (x ± 1)
 
 === Exemplo de utilização:
 
@@ -64,7 +65,7 @@ moveJogador (Jogador (x,y)) j p =
                 Rio v -> if (snd (p !! y) !! x) == Tronco then Jogador (x-1+v,y) else Jogador (x-1, y)
                 _ -> if (x-1 < 0) || (snd (p !! y) !! (x-1)) == Arvore then Jogador (x,y) else Jogador (x-1,y)
 
-{- | A função __recursiva__ 'animaObstaculos' recebe uma lista de linhas do mapa, com ajuda da função auxiliar 'animaObstaculoAux' e através da velocidade v do terreno move todos os elementos da lista de obstáculos |v| unidades na direção da velocidade.
+{- | A função __recursiva__ 'animaObstaculos' recebe uma lista de linhas do mapa e, com ajuda da função auxiliar 'animaObstaculoAux' e através da velocidade v do terreno, move todos os elementos da lista de obstáculos |v| unidades na direção da velocidade.
 
 === Exemplo de utilização:
 

@@ -33,8 +33,8 @@ False
 True
 -}
 
-jogoTerminou :: Jogo -- ^Jogo a avaliar, onde estão incluídas as coordenadas do Jogador e os dados do Mapa.
-    -> Bool -- ^Será True quando o Jogador perder, e False quando ainda não tiver perdido.
+jogoTerminou :: Jogo -- ^Jogo a avaliar, onde estão incluídas as coordenadas do 'Jogador' e os dados do 'Mapa'.
+    -> Bool -- ^Será 'True' quando o Jogador perder, e 'False' quando ainda não tiver perdido.
 jogoTerminou (Jogo (Jogador (x,y)) (Mapa l p))
     | x < 0 || x >= length (snd (head p)) || y < 0 || y >= length p = True
     | otherwise = let terreno = fst (p !! y); obstaculo = snd (p !! y) !! x in

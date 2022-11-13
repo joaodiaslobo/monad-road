@@ -11,10 +11,10 @@ module Tarefa2_2022li1g002 where
 import LI12223
 import System.Random ( mkStdGen, Random(randoms) )
 
-{- | A função __não recursiva__ 'estendeMapa' recebe um mapa e uma seed /(um número de 1 a 100 usado para gerar os números aleatórios)/. Quando o mapa passado no primeiro argumento não tem linhas assumimos que esta vai ser a linha que inicia o mapa e retornamos uma linha de terreno relva sem obstáculos.
+{- | A função __não recursiva__ 'estendeMapa' recebe um mapa e uma seed /(um número de 1 a 100 usado para gerar os números aleatórios)/. Quando o mapa passado no primeiro argumento não tem linhas, assumimos que esta vai ser a linha que inicia o mapa e retornamos uma linha de terreno relva sem obstáculos.
 
 === Funcionamento da aleatoriedade:
-Através da seed recebida como argumento, a função 'obterRandoms' gera uma lista com números de 19 dígitos.
+Através da /seed/ recebida como argumento, a função 'obterRandoms' gera uma lista com números de 19 dígitos.
 O tamanho desta lista corresponde à largura do mapa mais uma unidade. A 'head' da lista é usada para gerar o terreno, já os restantes elementos são utilizados para gerar os obstáculos.
 
 === Exemplo de utilização:
@@ -23,7 +23,7 @@ O tamanho desta lista corresponde à largura do mapa mais uma unidade. A 'head' 
 Mapa 5 [(Relva, [Arvore, Nenhum, Arvore, Nenhum, Arvore]),(Estrada (-1), [Nenhum, Nenhum, Nenhum, Carro, Carro]),(Relva, [Arvore, Nenhum, Nenhum, Arvore, Arvore]),(Rio, [Nenhum, Tronco, Tronco, Nenhum, Tronco])]
 -}
 estendeMapa :: Mapa -- ^Mapa antecedente da nova linha.
-    -> Int -- ^Seed.
+    -> Int -- ^/Seed/.
     -> Mapa -- ^Mapa com a nova linha.
 estendeMapa (Mapa l []) _ = Mapa l [(Relva, replicate l Nenhum)] 
 estendeMapa (Mapa l to) seed =
@@ -48,8 +48,8 @@ gerarTerreno :: Int -- ^Primeiro número gerado que irá ser aplicado para desco
     -> Terreno -- ^Terreno escolhido aleatoriamente.
 gerarTerreno s l = (l !! (mod s (length l)))
 
-{- | A função __não recursiva__ 'obterRandoms' recebe um inteiro, a Seed, e outro inteiro, a soma de 1 unidade ao valor da largura do mapa a prolongar. Com estes valores, a função ao ser executada irá devolver uma lista de inteiros gerados aleatoriamente, que serão utilizados nas funções 'gerarTerreno' e 'gerarObstaculos'.-}
-obterRandoms :: Int -- ^Seed.
+{- | A função __não recursiva__ 'obterRandoms' recebe um inteiro, a /Seed/, e outro inteiro, a soma de 1 unidade ao valor da largura do mapa a prolongar. Com estes valores, a função ao ser executada irá devolver uma lista de inteiros gerados aleatoriamente, que serão utilizados nas funções 'gerarTerreno' e 'gerarObstaculos'.-}
+obterRandoms :: Int -- ^/Seed/.
     -> Int -- ^Número inteiro obtido através da soma de 1 unidade à largura do mapa a prolongar.
     -> [Int] -- ^Lista de números gerados aleatoriamente.
 obterRandoms seed n = take n $ randoms (mkStdGen seed)
@@ -142,7 +142,7 @@ proximosObstaculosValidos l (terr, obs) =
                 if ultNenhum then [Nenhum] else if length obs + 1 == l then ultimoObstaculoCaso (Rio 0) obs else
                     proximosObstaculosRioAux obs 0
 
-{- | A função __não recursiva__ 'ultimoObstaculoCaso' foi implementada para evitar um caso de repetição de obstáculos. Quando estão a ser escolhidos os próximos obstáculos válidos para uma linha, é preciso ter em conta os obstáculos no início da mesma, pois sem esta função, como a linha se move colocando o último elemento no início da lista (velocidade positiva) ou o primeiro elemento no final da lista (velocidade negativa), em alguns casos as dimensões dos obstáculos podem ultrapassar os limites definidos sabendo que podem ser constituídos por elementos no início e no fim da lista, estando no processo de entrada na outra ponta da lista. -}
+{- | A função __não recursiva__ 'ultimoObstaculoCaso' foi implementada para evitar um caso de repetição de obstáculos. Quando estão a ser escolhidos os próximos obstáculos válidos para uma linha, é preciso ter em conta os obstáculos no início da mesma pois, sem esta função, como a linha se move colocando o último elemento no início da lista (velocidade positiva) ou o primeiro elemento no final da lista (velocidade negativa), em alguns casos as dimensões dos obstáculos podem ultrapassar os limites definidos sabendo que podem ser constituídos por elementos no início e no fim da lista, estando no processo de entrada na outra ponta da lista. -}
 ultimoObstaculoCaso :: Terreno -- ^Terreno onde o obstáculo está a ser gerado.
     -> [Obstaculo] -- ^Estado da linha antes de adicionar o obstáculo.
     -> [Obstaculo] -- ^Lista de obstáculos válidos.
@@ -155,7 +155,7 @@ ultimoObstaculoCaso terr obs =
 contaPrimeirasUltimasOcorrencias :: Eq a => [a] -- ^Lista de um elemento genérico. 
     -> a -- ^Elemento genérico a ser contado.
     -> Bool -- ^Argumento booleano que define se se deve estudar os elementos finais ou iniciais.
-    -> Int -- ^Número de ocorrências iniciais ou finais de um dado elementi 
+    -> Int -- ^Número de ocorrências iniciais ou finais de um dado elemento.
 contaPrimeirasUltimasOcorrencias [] _ _ = 0
 contaPrimeirasUltimasOcorrencias (h:t) e True = if h == e then 1 + contaPrimeirasUltimasOcorrencias t e True else 0 
 contaPrimeirasUltimasOcorrencias l e False = if last l == e then 1 + contaPrimeirasUltimasOcorrencias (init l) e False else 0 
@@ -176,4 +176,5 @@ proximosObstaculosRioAux _ 5 = [Nenhum]
 proximosObstaculosRioAux [] _ = [Nenhum, Tronco]
 proximosObstaculosRioAux l n = if last l == Tronco then proximosObstaculosRioAux (init l) (n+1) else [Nenhum, Tronco]
 
+{- | Constante global que contém o intervalo de velocidades que podem aparecer no mapa. -}
 velocidadeMaxMin = (1, 3)
