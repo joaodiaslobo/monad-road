@@ -43,14 +43,26 @@ moveJogador :: Jogador -- ^Estado do jogador antes da jogada.
     -> Jogador -- ^Estado do jogador pós jogada.
 moveJogador (Jogador (x,y)) j p =
     case j of
-        Parado ->
+        Parado -> 
             case fst (p !! y) of
                 Rio v -> if (snd (p !! y) !! x) == Tronco then Jogador (x+v,y) else Jogador (x,y)
                 _ -> Jogador (x,y)
-        Move Cima -> if  (y-1 < 0) || ((snd (p !! (y-1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y-1)
-        Move Baixo -> if (y+1 >= length p) || ((snd (p !! (y+1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y+1)
-        Move Direita -> if (x+1 >= length (snd (head p))) || (snd (p !! y) !! (x+1)) == Arvore then Jogador (x,y) else Jogador (x+1,y)
-        Move Esquerda -> if (x-1 < 0) || (snd (p !! y) !! (x-1)) == Arvore then Jogador (x,y) else Jogador (x-1,y)
+        Move Cima -> 
+            case fst (p !! y) of
+                Rio v -> if  (y-1 < 0) || ((snd (p !! (y-1)) !! x) == Arvore) then Jogador (x+v,y) else Jogador (x,y-1)
+                _ -> if  (y-1 < 0) || ((snd (p !! (y-1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y-1)
+        Move Baixo ->
+            case fst (p !! y) of
+                Rio v -> if (y+1 >= length p) || ((snd (p !! (y+1)) !! x) == Arvore) then Jogador (x+v,y) else Jogador (x,y+1)
+                _ -> if (y+1 >= length p) || ((snd (p !! (y+1)) !! x) == Arvore) then Jogador (x,y) else Jogador (x,y+1)
+        Move Direita ->
+            case fst (p !! y) of
+                Rio v -> if (snd (p !! y) !! x) == Tronco then Jogador (x+1+v,y) else Jogador (x+1, y)
+                _ -> if (x+1 >= length (snd (head p))) || (snd (p !! y) !! (x+1)) == Arvore then Jogador (x,y) else Jogador (x+1,y)
+        Move Esquerda -> 
+            case fst (p !! y) of
+                Rio v -> if (snd (p !! y) !! x) == Tronco then Jogador (x-1+v,y) else Jogador (x-1, y)
+                _ -> if (x-1 < 0) || (snd (p !! y) !! (x-1)) == Arvore then Jogador (x,y) else Jogador (x-1,y)
 
 {- | A função __recursiva__ 'animaObstaculos' recebe uma lista de linhas do mapa, com ajuda da função auxiliar 'animaObstaculoAux' e através da velocidade v do terreno move todos os elementos da lista de obstáculos |v| unidades na direção da velocidade.
 
