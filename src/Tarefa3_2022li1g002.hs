@@ -21,7 +21,7 @@ animaJogo :: Jogo -- ^Estado do jogo antes da jogada.
     -> Jogada -- ^A jogada em si, 'Nenhum' ou 'Move' 'Direcao'.
     -> Jogo -- ^Jogo após a jogada dada.
 animaJogo (Jogo p (Mapa l ls)) j = Jogo jogador (Mapa l linhas)
-    where jogador = moveJogador p j ls; linhas = animaObstaculos ls
+    where jogador = moveJogador p j ls; linhas = animaObstaculos ls jogador
 
 {- | A função __não recursiva__ 'moveJogador' recebe 'Jogador' com as 'Coordenadas' antes das execução da função, uma 'Jogada' e a lista de linhas do mapa. Para o jogador se mover, têm de ser respeitadas as seguintes condições:
 
@@ -73,28 +73,32 @@ moveJogador (Jogador (x,y)) j p =
 [(Rio (-1),[Tronco,Tronco,Nenhum,Nenhum]),(Estrada 2,[Nenhum,Nenhum,Carro,Carro]),(Rio 1,[Nenhum,Tronco,Tronco,Nenhum])]
 -}
 animaObstaculos :: [(Terreno, [Obstaculo])] -- ^Linhas do mapa antes da animação.
+    -> Jogador -- ^Estado do jogador pós movimentos.
     -> [(Terreno, [Obstaculo])] -- ^Linhas do mapa depois do movimento dos obstáculos.
-animaObstaculos [] = []
-animaObstaculos (l:t) = 
+animaObstaculos [] _ = []
+animaObstaculos (l:t) (Jogador (x,y)) = 
     case fst l of
-        Relva -> l:animaObstaculos t
-        Rio v -> (Rio v, animaObstaculoAux v (snd l) 0):animaObstaculos t
-        Estrada v -> (Estrada v, animaObstaculoAux v (snd l) 0):animaObstaculos t
+        Relva -> l:animaObstaculos t  (Jogador (x,y-1))
+        Rio v -> (Rio v, animaObstaculoAux v (snd l) 0 x (y==0)):animaObstaculos t (Jogador (x,y-1))
+        Estrada v -> (Estrada v, animaObstaculoAux v (snd l) 0 x (y==0)):animaObstaculos t (Jogador (x,y-1)) 
 
 {- | A função auxiliar __recursiva__ 'animaObstaculoAux' recebe uma velocidade e uma lista de obstáculos, com esses valores "desvia" os elementos da lista pelo valor da velocidade.
 
 === Exemplo de utilização:
-
+:animaObstaculos t (x,y-1)
 >>>animaObstaculoAux (-1) [Nenhum,Tronco,Tronco,Nenhum] 0
 [Tronco,Tronco,Nenhum,Nenhum]
 -}
 animaObstaculoAux :: Velocidade -- ^Velocidade do terreno a ser animado.
     -> [Obstaculo] -- ^Lista de obstáculos a ser movimentados.
-    -> Int -- ^Contador. 
+    -> Int -- ^Contador.
+    -> Int -- ^x do Jogador
+    -> Bool -- ^Indica se o jogador está nesta linha
     -> [Obstaculo] -- ^Obstáculos pós transformação no x.
-animaObstaculoAux v o n
+animaObstaculoAux v o n x b
+    | ((o !! x) == Carro) && b = o
     | v > 0 =
-        if n < v then animaObstaculoAux v (last o:init o) (n+1) else o
+        if n < v then animaObstaculoAux v (last o:init o) (n+1) x b else o
     | v < 0 =
-        if n < abs v then animaObstaculoAux v (tail o++[head o]) (n+1) else o
+        if n < abs v then animaObstaculoAux v (tail o++[head o]) (n+1) x b else o
     | otherwise = o
