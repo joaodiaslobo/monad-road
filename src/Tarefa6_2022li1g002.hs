@@ -28,6 +28,9 @@ data Estado = Estado
         cena :: Cena,
         opcao :: Options,
         jogo :: Jogo,
+        movimento :: Jogada,
+        direcao :: Direcao,
+        vivo :: Bool,
         tick :: Int,
         seed :: Int
     } deriving Show
@@ -41,7 +44,7 @@ larguraMapa = 20
 estadoInicial :: IO Estado
 estadoInicial = do
     seed <- randomRIO (1 :: Int, 100 :: Int)
-    return $ Estado False MainMenu Jogar (Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) 0 seed
+    return $ Estado False MainMenu Jogar (Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed
 
 dm :: Display
 dm = InWindow "Monad Road" dimensoesDisplay (0,0)
@@ -59,20 +62,39 @@ taxaUpdate :: Int
 taxaUpdate = 50
 
 drawEstado :: [[Picture]] -> Estado -> Picture
-drawEstado ps (Estado _ MainMenu Jogar _ _ _) = head $ head ps
-drawEstado ps (Estado _ MainMenu Sair _ _ _) = head ps !! 1
-drawEstado ps (Estado debug JogoCena _ j@(Jogo p@(Jogador c@(x,y)) m) t s)
-    | debug = Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c t, drawMuros,drawDebugUI s]
-    | otherwise =  Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c t, drawMuros]
+drawEstado ps (Estado _ MainMenu Jogar _ _ _ _ _ _) = head $ head ps
+drawEstado ps (Estado _ MainMenu Sair _ _ _ _ _ _) = head ps !! 1
+drawEstado ps (Estado debug JogoCena _ j@(Jogo p@(Jogador c@(x,y)) m) _ d morto t s)
+    | debug = Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c d t, drawMuros,drawDebugUI s (x,y) t d (not morto)]
+    | otherwise =  Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c d t, drawMuros]
 
-drawDebugUI :: Int -> Picture
-drawDebugUI s = Pictures [Translate (-785) 400 $ Scale 0.2 0.2 (Text ("SEED: "++show s))]
+drawDebugUI :: Int -> (Int,Int) -> Int -> Direcao -> Bool -> Picture
+drawDebugUI s (x,y) t d m = Pictures [Translate (-785) 400 $ Scale 0.2 0.2 (Text ("SEED: "++show s)), Translate (-785) 350 $ Scale 0.2 0.2 (Text ("POSICAO: "++show x++", "++show y)), Translate (-785) 300 $ Scale 0.2 0.2 (Text ("DIRECAO: "++show d)), Translate (-785) 250 $ Scale 0.2 0.2 (Text ("MORTO?: "++show m)), Translate (-785) 200 $ Scale 0.2 0.2 (Text ("TICK: "++show t))]
 
 drawMuros :: Picture
 drawMuros = Pictures [Translate 700 (-465) $ Rotate 64 $ Color corFundo $ rectangleSolid 150 400, Translate (-400) 300 $ Rotate 64 $ Color corFundo $ rectangleSolid 150 400]
 
-drawJogo :: [[Picture]] -> Mapa -> Coordenadas -> Int -> Picture
-drawJogo ps m@(Mapa l ls) co t = Translate (fromIntegral alturaMapa * (50) - 900) (fromIntegral alturaMapa * (25) - 600) $ Pictures $ drawMapa (head ps) m (0,400)++drawObstaculos (ps !! 1) m (0,400) t co
+drawJogo :: [[Picture]] -> Mapa -> Coordenadas -> Direcao -> Int -> Picture
+drawJogo ps m@(Mapa l ls) co@(x,y) d t = Translate (fromIntegral alturaMapa * (50) - 900) (fromIntegral alturaMapa * (25) - 600) $ Pictures $ drawMapa (head ps) m (0,400)++drawObstaculos (ps !! 1) m (0,400) t co++[drawJogador (ps !! 2) d co v t]
+    where v =
+            let linha = ls !! y in
+            case fst linha of
+                Rio vv -> if x >= 0 && x <= l && snd linha !! x == Tronco then vv else 0
+                _ -> 0
+
+drawJogador :: [Picture] -> Direcao -> Coordenadas -> Velocidade -> Int -> Picture
+drawJogador ps d (x,y) 0 _ =
+    case d of
+        Cima -> Translate  (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 0)
+        Baixo -> Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 1)
+        Esquerda -> Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 2)
+        Direita -> Translate (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 3)
+drawJogador ps d (x,y) v t =
+    case d of
+        Cima -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate  (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 0)
+        Baixo -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 1)
+        Esquerda -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 2)
+        Direita -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 3)
 
 drawMapa :: [Picture] -> Mapa -> (Float,Float) -> [Picture]
 drawMapa _ (Mapa la []) _ = []
@@ -110,17 +132,24 @@ drawLinhaObstaculo ps obs@(h:t) (x,y) v ti p =
         Nenhum -> drawLinhaObstaculo ps (tail obs) (x+50,y-25) v ti p
 
 inputReage :: Event -> Estado -> Estado
-inputReage (EventKey (Char 'p') Down _ _) estado@(Estado d _ _ _ _ _) = estado{ debug = not d }
-inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _) = estado{ opcao = Sair }
-inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ MainMenu Sair _ _ _) = estado{ opcao = Jogar }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Sair _ _ _) = undefined
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _) = estado{ cena = JogoCena }
-inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ JogoCena _ _ _ s) = estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0}
+inputReage (EventKey (Char 'p') Down _ _) estado@(Estado d _ _ _ _ _ _ _ _) = estado{ debug = not d }
+inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _ _ _ _) = estado{ opcao = Sair }
+inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ MainMenu Sair _ _ _ _ _ _) = estado{ opcao = Jogar }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Sair _ _ _ _ _ _) = undefined
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _ _ _ _) = estado{ cena = JogoCena }
+inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ _ s) = estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
+inputReage (EventKey (Char 'w') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Cima, direcao = Cima }
+inputReage (EventKey (Char 'a') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Esquerda, direcao = Esquerda }
+inputReage (EventKey (Char 's') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Baixo, direcao = Baixo }
+inputReage (EventKey (Char 'd') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Direita, direcao = Direita }
 inputReage _ e = e
 
 tempoReage :: Float -> Estado -> Estado
-tempoReage f estado@(Estado _ JogoCena _ jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) t seed)
-    | t == taxaUpdate = let novoJogo = animaJogo jogo Parado in estado{ jogo = novoJogo, tick = 0}
+tempoReage f estado@(Estado _ JogoCena _ jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) movimento _ vivo t seed)
+    | t == taxaUpdate && vivo = let novoJogo = animaJogo jogo Parado in estado{ jogo = novoJogo, tick = 0, vivo = not $ jogoTerminou novoJogo }
+    | t == taxaUpdate = estado{tick = 0, jogo = jogo}
+    | movimento /= Parado = let jogador@(Jogador (xx,yy)) = moveJogador j movimento ls; novoJogo = Jogo jogador m; in
+        estado{ jogo = novoJogo, movimento = Parado, tick = t+1, vivo = not $ jogoTerminou novoJogo}
     | otherwise = estado{ tick = t+1 }
 tempoReage _ estado = estado
 
@@ -138,6 +167,10 @@ main = do
     Just tronco <- loadJuicyPNG $ imagensCaminho ++ "obstaculos/tronco.png"
     Just carroDireita <- loadJuicyPNG $ imagensCaminho ++ "obstaculos/carroDireita.png"
     Just carroEsquerda <- loadJuicyPNG $ imagensCaminho ++ "obstaculos/carroEsquerda.png"
+    Just galinhaCima <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaCima.png"
+    Just galinhaBaixo <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaBaixo.png"
+    Just galinhaEsquerda <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaEsquerda.png"
+    Just galinhaDireita <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaDireita.png"
 
     seed <- randomRIO (1 :: Int, 100 :: Int)
     estado <- estadoInicial
@@ -146,7 +179,7 @@ main = do
         corFundo
         fps
         estado
-        (drawEstado [[mm00, mm01], [relva,rio,estrada], [arvore, tronco, carroDireita, carroEsquerda]])
+        (drawEstado [[mm00, mm01], [relva,rio,estrada], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita]])
         inputReage
         tempoReage
 
