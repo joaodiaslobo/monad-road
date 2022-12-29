@@ -46,7 +46,7 @@ gerarObstaculos (h:ss) l t o = let obsValidos = (proximosObstaculosValidos l (t,
 gerarTerreno :: Int -- ^Primeiro número gerado que irá ser aplicado para descobrir qual o tipo de terreno escolhido aleatoriamente.
     -> [Terreno] -- ^Lista com os tipos de terreno possíveis da qual se escolherá um aleatoriamente.
     -> Terreno -- ^Terreno escolhido aleatoriamente.
-gerarTerreno s l = (l !! (mod s (length l)))
+gerarTerreno s l = l !! mod s (length l)
 
 {- | A função __não recursiva__ 'obterRandoms' recebe um inteiro, a /Seed/, e outro inteiro, a soma de 1 unidade ao valor da largura do mapa a prolongar. Com estes valores, a função ao ser executada irá devolver uma lista de inteiros gerados aleatoriamente, que serão utilizados nas funções 'gerarTerreno' e 'gerarObstaculos'.-}
 obterRandoms :: Int -- ^/Seed/.
@@ -177,4 +177,5 @@ proximosObstaculosRioAux [] _ = [Nenhum, Tronco]
 proximosObstaculosRioAux l n = if last l == Tronco then proximosObstaculosRioAux (init l) (n+1) else [Nenhum, Tronco]
 
 {- | Constante global que contém o intervalo de velocidades que podem aparecer no mapa. -}
-velocidadeMaxMin = (1, 3)
+-- 1 , 3
+velocidadeMaxMin = (1, 2)

@@ -79,8 +79,8 @@ animaObstaculos [] _ = []
 animaObstaculos (l:t) (Jogador (x,y)) = 
     case fst l of
         Relva -> l:animaObstaculos t  (Jogador (x,y-1))
-        Rio v -> (Rio v, animaObstaculoAux v (snd l) 0 x (y==0)):animaObstaculos t (Jogador (x,y-1))
-        Estrada v -> (Estrada v, animaObstaculoAux v (snd l) 0 x (y==0)):animaObstaculos t (Jogador (x,y-1)) 
+        Rio v -> (Rio v, animaObstaculoAux v (snd l) 0 x (y == 0)):animaObstaculos t (Jogador (x,y-1))
+        Estrada v -> (Estrada v, animaObstaculoAux v (snd l) 0 x (y == 0)):animaObstaculos t (Jogador (x,y-1)) 
 
 {- | A função auxiliar __recursiva__ 'animaObstaculoAux' recebe uma velocidade e uma lista de obstáculos, com esses valores "desvia" os elementos da lista pelo valor da velocidade.
 
@@ -96,7 +96,7 @@ animaObstaculoAux :: Velocidade -- ^Velocidade do terreno a ser animado.
     -> Bool -- ^Indica se o jogador está nesta linha
     -> [Obstaculo] -- ^Obstáculos pós transformação no x.
 animaObstaculoAux v o n x b
-    | ((o !! x) == Carro) && b = o
+    | x <= length o - 1 && x >= 0 && ((o !! x) == Carro) && b = o
     | v > 0 =
         if n < v then animaObstaculoAux v (last o:init o) (n+1) x b else o
     | v < 0 =
