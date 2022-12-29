@@ -32,7 +32,8 @@ data Estado = Estado
         direcao :: Direcao,
         vivo :: Bool,
         tick :: Int,
-        seed :: Int
+        seed :: Int,
+        pontuacao :: (Int,Int)
     } deriving Show
 
 alturaMapa :: Int
@@ -44,7 +45,7 @@ larguraMapa = 20
 estadoInicial :: IO Estado
 estadoInicial = do
     seed <- randomRIO (1 :: Int, 100 :: Int)
-    return $ Estado False MainMenu Jogar (Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed
+    return $ Estado False MainMenu Jogar (Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed (0,0)
 
 dm :: Display
 dm = InWindow "Monad Road" dimensoesDisplay (0,0)
@@ -62,11 +63,14 @@ taxaUpdate :: Int
 taxaUpdate = 50
 
 drawEstado :: [[Picture]] -> Estado -> Picture
-drawEstado ps (Estado _ MainMenu Jogar _ _ _ _ _ _) = head $ head ps
-drawEstado ps (Estado _ MainMenu Sair _ _ _ _ _ _) = head ps !! 1
-drawEstado ps (Estado debug JogoCena _ j@(Jogo p@(Jogador c@(x,y)) m) _ d morto t s)
-    | debug = Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c d t, drawMuros,drawDebugUI s (x,y) t d (not morto)]
-    | otherwise =  Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c d t, drawMuros]
+drawEstado ps (Estado _ MainMenu Jogar _ _ _ _ _ _ _) = head $ head ps
+drawEstado ps (Estado _ MainMenu Sair _ _ _ _ _ _ _) = head ps !! 1
+drawEstado ps (Estado debug JogoCena _ j@(Jogo p@(Jogador c@(x,y)) m) _ d morto t s (pt,_))
+    | debug = Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c d t, drawMuros,drawDebugUI s (x,y) t d (not morto), drawJogoUI pt]
+    | otherwise =  Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c d t, drawMuros, drawJogoUI pt]
+
+drawJogoUI :: Int -> Picture
+drawJogoUI p = Translate 0 360 $ Scale 0.5 0.5 $ Text $ show p
 
 drawDebugUI :: Int -> (Int,Int) -> Int -> Direcao -> Bool -> Picture
 drawDebugUI s (x,y) t d m = Pictures [Translate (-785) 400 $ Scale 0.2 0.2 (Text ("SEED: "++show s)), Translate (-785) 350 $ Scale 0.2 0.2 (Text ("POSICAO: "++show x++", "++show y)), Translate (-785) 300 $ Scale 0.2 0.2 (Text ("DIRECAO: "++show d)), Translate (-785) 250 $ Scale 0.2 0.2 (Text ("MORTO?: "++show m)), Translate (-785) 200 $ Scale 0.2 0.2 (Text ("TICK: "++show t))]
@@ -132,24 +136,24 @@ drawLinhaObstaculo ps obs@(h:t) (x,y) v ti p =
         Nenhum -> drawLinhaObstaculo ps (tail obs) (x+50,y-25) v ti p
 
 inputReage :: Event -> Estado -> Estado
-inputReage (EventKey (Char 'p') Down _ _) estado@(Estado d _ _ _ _ _ _ _ _) = estado{ debug = not d }
-inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _ _ _ _) = estado{ opcao = Sair }
-inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ MainMenu Sair _ _ _ _ _ _) = estado{ opcao = Jogar }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Sair _ _ _ _ _ _) = undefined
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _ _ _ _) = estado{ cena = JogoCena }
-inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ _ s) = estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
-inputReage (EventKey (Char 'w') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Cima, direcao = Cima }
-inputReage (EventKey (Char 'a') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Esquerda, direcao = Esquerda }
-inputReage (EventKey (Char 's') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Baixo, direcao = Baixo }
-inputReage (EventKey (Char 'd') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _) = estado{ movimento = Move Direita, direcao = Direita }
+inputReage (EventKey (Char 'p') Down _ _) estado@(Estado d _ _ _ _ _ _ _ _ _) = estado{ debug = not d }
+inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _ _ _ _ _) = estado{ opcao = Sair }
+inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ MainMenu Sair _ _ _ _ _ _ _) = estado{ opcao = Jogar }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Sair _ _ _ _ _ _ _) = undefined
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ MainMenu Jogar _ _ _ _ _ _ _) = estado{ cena = JogoCena }
+inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ _ s _) = estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
+inputReage (EventKey (Char 'a') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _ _) = estado{ movimento = Move Esquerda, direcao = Esquerda }
+inputReage (EventKey (Char 'w') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _ _) = estado{ movimento = Move Cima, direcao = Cima }
+inputReage (EventKey (Char 's') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _ _) = estado{ movimento = Move Baixo, direcao = Baixo }
+inputReage (EventKey (Char 'd') Down _ _) estado@(Estado _ JogoCena _ _ _ _ _ t _ _) = estado{ movimento = Move Direita, direcao = Direita }
 inputReage _ e = e
 
 tempoReage :: Float -> Estado -> Estado
-tempoReage f estado@(Estado _ JogoCena _ jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) movimento _ vivo t seed)
+tempoReage f estado@(Estado _ JogoCena _ jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) movimento _ vivo t seed (pt,auxPt))
     | t == taxaUpdate && vivo = let novoJogo = animaJogo jogo Parado in estado{ jogo = novoJogo, tick = 0, vivo = not $ jogoTerminou novoJogo }
     | t == taxaUpdate = estado{tick = 0, jogo = jogo}
-    | movimento /= Parado = let jogador@(Jogador (xx,yy)) = moveJogador j movimento ls; novoJogo = Jogo jogador m; in
-        estado{ jogo = novoJogo, movimento = Parado, tick = t+1, vivo = not $ jogoTerminou novoJogo}
+    | movimento /= Parado = let jogador@(Jogador (xx,yy)) = moveJogador j movimento ls; novoJogo = Jogo jogador m; novoAuxPt = if yy < y then (auxPt + 1) else if yy > y then (auxPt - 1) else auxPt; in
+        estado{ jogo = novoJogo, movimento = Parado, tick = t+1, vivo = not $ jogoTerminou novoJogo, pontuacao = if novoAuxPt > 0 then (pt + 1,0) else (pt,novoAuxPt)}
     | otherwise = estado{ tick = t+1 }
 tempoReage _ estado = estado
 
@@ -196,3 +200,4 @@ geraMapaAux :: [Int] -- ^Lista de /randoms/.
     -> Mapa -- ^Mapa gerado.
 geraMapaAux [] l = Mapa l [(Relva, replicate l Nenhum),(Relva, replicate l Nenhum),(Relva, replicate l Nenhum),(Relva, replicate l Nenhum)]
 geraMapaAux (h:t) l = let ss = mod h 100 in estendeMapa (geraMapaAux t l) ss
+
