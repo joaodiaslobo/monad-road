@@ -154,7 +154,7 @@ tempoReage :: Float -> Estado -> Estado
 tempoReage f estado@(Estado _ JogoCena _ jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) movimento _ vivo t seed (pt,auxPt) gy)
     | t == taxaUpdate && vivo = let novoJogo = animaJogo jogo Parado; desliza = pt >= 4 in estado{ jogo = if not desliza then novoJogo else deslizaJogo (randoms (mkStdGen seed) !! gy)  novoJogo, tick = 0, vivo = not $ jogoTerminou novoJogo, genY = if desliza then gy + 1 else gy}
     | t == taxaUpdate = estado{tick = 0, jogo = jogo}
-    | movimento /= Parado = let jogador@(Jogador (xx,yy)) = moveJogador j movimento ls; novoJogo = Jogo jogador m; novoAuxPt = if yy < y then auxPt + 1 else if yy > y then auxPt - 1 else auxPt; in
+    | movimento /= Parado = let jogador@(Jogador (xx,yy)) = if t > div taxaUpdate 2 then moveJogador j movimento $ arranjaRios (obterLinhas $ animaJogo jogo Parado) else moveJogador j movimento $ arranjaRios ls; novoJogo = Jogo jogador m; novoAuxPt = if yy < y then auxPt + 1 else if yy > y then auxPt - 1 else auxPt; in
         estado{ jogo = novoJogo, movimento = Parado, tick = t+1, vivo = not $ jogoTerminou novoJogo, pontuacao = if novoAuxPt > 0 then (pt + 1,0) else (pt,novoAuxPt)}
     | otherwise = estado{ tick = t+1 }
 tempoReage _ estado = estado
@@ -203,3 +203,13 @@ geraMapaAux :: [Int] -- ^Lista de /randoms/.
 geraMapaAux [] l = Mapa l [(Relva, replicate l Nenhum),(Relva, replicate l Nenhum),(Relva, replicate l Nenhum),(Relva, replicate l Nenhum)]
 geraMapaAux (h:t) l = let ss = mod h 100 in estendeMapa (geraMapaAux t l) ss
 
+{- | Como na primeira parte do projeto o jogo foi feito a pensar no movimento do jogador sincronizado com a animação dos obstáculos, ao contrário da segunda parte (jogador move-se independente da animação dos obstáculos), precisamos de fazer uma correção ao movimento dos troncos para o jogador se conseguir mover. -}
+arranjaRios :: [(Terreno, [Obstaculo])] -> [(Terreno, [Obstaculo])]
+arranjaRios [] = []
+arranjaRios ((t,obs):tt) =
+    case t of
+        Rio v -> (Rio 0, obs):arranjaRios tt
+        _ -> (t,obs):arranjaRios tt
+
+obterLinhas :: Jogo -> [(Terreno, [Obstaculo])]
+obterLinhas (Jogo _ (Mapa _ ls)) = ls
