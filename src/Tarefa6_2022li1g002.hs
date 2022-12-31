@@ -221,8 +221,7 @@ tempoReage _ estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks
         putStr "O mapa que estava a ser editado foi gravado"
         return estado{ editor = editor{ receberInput = False, nomeFicheiro = "" }}
     | ns /= [] = do
-        nome <- readFile (ns !! s)
-        novosChunks <- leChunks nome
+        novosChunks <- leChunks (ns !! s)
         return estado{ editor = editor{ receberSelectMapa = (False,0), mapasGuardados = [], chunks = novosChunks }}
     | otherwise = return estado
 tempoReage _ estado = return estado
@@ -382,6 +381,7 @@ nomeMapasGuardados = do
 
 leChunks :: String -> IO [Chunk]
 leChunks n = do
+    putStrLn $ "O mapa selecionado ("++n++") foi carregado"
     ficheiro <- readFile n
     return (read ficheiro)
 
