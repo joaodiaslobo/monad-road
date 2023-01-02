@@ -95,6 +95,9 @@ drawEstado ps (Estado _ Editor _ _ _ _ _ _ _ _ estadoEditor _) = do
     imagensEditor <- editorDeMapasImagens
     return $ drawEditor estadoEditor [(ps !! 1),(ps !! 2)] imagensEditor
 drawEstado ps (Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ nSkin) = return $ drawSkinsMenu (head (ps !! 6)) (ps !! 3) nSkin
+drawEstado ps (Estado _ (InfoMenu 2) _ _ _ _ _ _ _ _ _ _) = do
+    recorde <- atualizaRecorde 0
+    return $ Pictures [(ps !! 8) !! 2, Translate 170 0 $ drawPontuacao recorde (ps !! 5)]
 drawEstado ps (Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return $ (ps !! 8) !! n
 
 {- | A função 'drawSkinsMenu' desenha o menu de escolha de personagem. -}
@@ -338,7 +341,9 @@ tempoReage :: Float -- ^ Período de tempo em segundos que o jogo precisa de ava
     -> Estado -- ^ Estado antes da atualização.
     -> IO Estado -- ^ Novo estado.
 tempoReage f estado@(Estado _ (JogoCena (0,_)) jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) movimento _ vivo t seed (pt,auxPt) gy _ _)
-    | t /= taxaUpdate && mod t 10 == 0 = if jogoTerminou jogo then return estado{ cena = JogoCena (2,0) } else return estado{tick = t+1 }
+    | t /= taxaUpdate && mod t 10 == 0 = if jogoTerminou jogo then do
+        atualizaRecorde pt
+        return estado{ cena = JogoCena (2,0) } else return estado{tick = t+1 }
     | t == taxaUpdate && vivo = let novoJogo = animaJogo jogo Parado; desliza = pt >= 4 in return estado{ jogo = if not desliza then novoJogo else deslizaJogo (randoms (mkStdGen seed) !! gy)  novoJogo, tick = 0, vivo = not $ jogoTerminou novoJogo, genY = if desliza then gy + 1 else gy}
     | t == taxaUpdate = return estado{tick = 0 }
     | movimento /= Parado = let jogador@(Jogador (xx,yy)) = moveJogador j movimento $ arranjaRios ls; novoJogo = Jogo jogador m; novoAuxPt = if yy < y then auxPt + 1 else if yy > y then auxPt - 1 else auxPt; in
@@ -431,6 +436,16 @@ main = do
         (drawEstado [[mm00, mm01, mm02, mm03], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita, caoCima, caoBaixo, caoEsquerda, caoDireita, ninjaCima, ninjaBaixo, ninjaEsquerda, ninjaDireita, xadrezCima, xadrezBaixo, xadrezEsquerda, xadrezDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], [sm], [go00, go01], [in00, in01, in02, in03]])
         inputReage
         tempoReage
+
+atualizaRecorde :: Int -> IO Int
+atualizaRecorde n = do
+    ficheiroExiste <- doesFileExist "highscore.save"
+    ficheiro <- if ficheiroExiste then readFile "highscore.save"
+                else return "0"
+    let bestAntigo = read ficheiro :: Int
+    bestReal <- if n > bestAntigo then return n else return bestAntigo
+    writeFile "highscore.save" (show bestReal)
+    return bestReal
 
 {- | A função __não recursiva__ 'geraMapa', através da função auxiliar 'geraMapaAux' e da função 'obterRandoms' presente no módulo da tarefa 2, gera um mapa pseudo-aleatório utilizando uma /seed/ e uma largura.-}
 geraMapa :: Largura -- ^Largura do mapa a ser gerado.
