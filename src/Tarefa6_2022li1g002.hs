@@ -80,7 +80,7 @@ drawEstado ps (Estado _ Editor _ _ _ _ _ _ _ _ estadoEditor _) = do
 drawEstado ps (Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ nSkin) = return $ drawSkinsMenu (head (ps !! 6)) (ps !! 3) nSkin
 
 drawSkinsMenu :: Picture -> [Picture] -> Int -> Picture
-drawSkinsMenu fundo ps n = Pictures [fundo, Scale 5 5 $ ps !! (1 + n*4)]
+drawSkinsMenu fundo ps n = Pictures [fundo, Scale 3 3 $ Translate 0 (-15) $ ps !! (1 + n*4)]
 
 drawMenu :: Cena -> [[Picture]] -> Picture
 drawMenu menu ps =
@@ -179,6 +179,7 @@ inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 
 inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ _) = return estado{ cena = JogoCena (0, 0) }
 inputReage (EventKey (SpecialKey KeyRight) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ n) = return estado{ skin = proximoN n 3 1 }
 inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ n) = return estado{ skin = proximoN n 3 (-1) }
+inputReage (EventKey (SpecialKey KeyEsc) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 0, skin = 0 }
 
 -- INPUT JOGO PRINCIPAL
 inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ _ s _ _ _ _) = return estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
