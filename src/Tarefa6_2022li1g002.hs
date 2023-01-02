@@ -29,6 +29,7 @@ data Cena
     | JogoCena (Int,Int) -- ^ Jogo, o tuplo de 'Int' serve para controlar os submenus, primeiro argumento: (@0@ -> Sem Menu, @1@ -> Menu de Pausa, @2@ -> Menu de Game Over), segundo argumento indica a opção do submenu selecionada.
     | Editor  -- ^ Editor de mapas.
     | SkinsMenu -- ^ Menu de escolha de personagem.
+    | InfoMenu Int -- ^ Menu de informação sobre o jogo.
     deriving (Eq, Show)
 
 {- | O tipo de dados 'Estado' contém algumas variáveis globais usadas para atualizar o jogo, a função 'tempoReage' utiliza este estado com frequência relativa aos 'fps' do jogo. Este tipo de dados usa "record syntax" que permite ultilizar as suas variáveis pelo nome. -}
@@ -94,6 +95,7 @@ drawEstado ps (Estado _ Editor _ _ _ _ _ _ _ _ estadoEditor _) = do
     imagensEditor <- editorDeMapasImagens
     return $ drawEditor estadoEditor [(ps !! 1),(ps !! 2)] imagensEditor
 drawEstado ps (Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ nSkin) = return $ drawSkinsMenu (head (ps !! 6)) (ps !! 3) nSkin
+drawEstado ps (Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return $ (ps !! 8) !! n
 
 {- | A função 'drawSkinsMenu' desenha o menu de escolha de personagem. -}
 drawSkinsMenu :: Picture -- ^ Imagem correspondente ao fundo do menu. 
@@ -258,6 +260,7 @@ inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 
     exitSuccess
 inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 1) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = Editor }
 inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 0) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = SkinsMenu }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 2) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = InfoMenu 0 }
 
 -- INPUT MENU SKINS
 inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ _) = return estado{ cena = JogoCena (0, 0) }
@@ -265,6 +268,10 @@ inputReage (EventKey (SpecialKey KeyRight) Down _ _) estado@(Estado _ SkinsMenu 
 inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ n) = return estado{ skin = proximoN n 3 (-1) }
 inputReage (EventKey (SpecialKey KeyEsc) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 0, skin = 0 }
 
+--INPUT MENU INFO
+inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = InfoMenu $ proximoN n 3 (-1) }
+inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = InfoMenu $ proximoN n 3 1 }
+inputReage (EventKey (SpecialKey KeyEsc) Down _ _) estado@(Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 0 }
 -- INPUT JOGO PRINCIPAL
 inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ _ s _ _ _ _) = return estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
 inputReage (EventKey (SpecialKey KeyLeft)  Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _ _) = return estado{ movimento = Move Esquerda, direcao = Esquerda }
@@ -364,6 +371,11 @@ main = do
     Just mm03 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu03.png"
     -- Skins Menu
     Just sm <- loadJuicyPNG $ imagensCaminho ++ "ui/skinsmenu/skinsmenu.png"
+    -- Info Menu
+    Just in00 <- loadJuicyPNG $ imagensCaminho ++ "ui/infomenu/infomenu00.png"
+    Just in01 <- loadJuicyPNG $ imagensCaminho ++ "ui/infomenu/infomenu01.png"
+    Just in02 <- loadJuicyPNG $ imagensCaminho ++ "ui/infomenu/infomenu02.png"
+    Just in03 <- loadJuicyPNG $ imagensCaminho ++ "ui/infomenu/infomenu03.png"
     -- Terrenos
     Just relva <- loadJuicyPNG $ imagensCaminho ++ "terreno/relva.png"
     Just rio <- loadJuicyPNG $ imagensCaminho ++ "terreno/rio.png"
@@ -416,7 +428,7 @@ main = do
         corFundo
         fps
         estado
-        (drawEstado [[mm00, mm01, mm02, mm03], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita, caoCima, caoBaixo, caoEsquerda, caoDireita, ninjaCima, ninjaBaixo, ninjaEsquerda, ninjaDireita, xadrezCima, xadrezBaixo, xadrezEsquerda, xadrezDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], [sm], [go00, go01]])
+        (drawEstado [[mm00, mm01, mm02, mm03], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita, caoCima, caoBaixo, caoEsquerda, caoDireita, ninjaCima, ninjaBaixo, ninjaEsquerda, ninjaDireita, xadrezCima, xadrezBaixo, xadrezEsquerda, xadrezDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], [sm], [go00, go01], [in00, in01, in02, in03]])
         inputReage
         tempoReage
 
