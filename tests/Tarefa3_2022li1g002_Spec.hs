@@ -54,17 +54,17 @@ testsMoveJogador = [
     ]
 
 testsAnimaObstaculos = [
-    "Teste que anima obstáculos do exemplo 1" ~: [(Rio 3,[Tronco,Nenhum,Tronco,Tronco,Nenhum]),(Estrada (-2),[Nenhum,Carro,Nenhum,Nenhum,Nenhum]),(Relva,[Nenhum,Arvore,Arvore,Nenhum,Arvore])] ~=? animaObstaculos linhasTeste01,
-    "Teste que anima obstáculos do exemplo 2" ~: [(Rio 2,[Nenhum,Tronco,Tronco,Nenhum,Nenhum]),(Estrada (-1),[Carro,Carro,Nenhum,Carro,Nenhum]),(Relva,[Arvore,Nenhum,Nenhum,Nenhum,Arvore])] ~=? animaObstaculos linhasTeste02,
-    "Teste que anima obstáculos do exemplo 3" ~: [(Rio 1,[Nenhum,Nenhum,Nenhum,Tronco,Nenhum]),(Estrada 1,[Nenhum,Carro,Nenhum,Nenhum,Carro]),(Relva,[Arvore,Arvore,Nenhum,Arvore,Nenhum])] ~=? animaObstaculos linhasTeste03,
-    "Teste que anima obstáculos do exemplo 4" ~: [(Rio (-1),[Nenhum,Nenhum,Tronco,Tronco,Nenhum]),(Estrada 2,[Carro,Carro,Nenhum,Carro,Nenhum]),(Relva,[Nenhum,Nenhum,Nenhum,Arvore,Arvore])] ~=? animaObstaculos linhasTeste04,
-    "Teste que anima obstáculos do exemplo 5" ~: [(Rio (-2),[Tronco,Nenhum,Nenhum,Tronco,Tronco]),(Estrada 3,[Carro,Carro,Nenhum,Nenhum,Nenhum]),(Relva,[Arvore,Nenhum,Arvore,Nenhum,Arvore])] ~=? animaObstaculos linhasTeste05
+    "Teste que anima obstáculos do exemplo 1" ~: [(Rio 3,[Tronco,Nenhum,Tronco,Tronco,Nenhum]),(Estrada (-2),[Nenhum,Carro,Nenhum,Nenhum,Nenhum]),(Relva,[Nenhum,Arvore,Arvore,Nenhum,Arvore])] ~=? animaObstaculos linhasTeste01 (Jogador (1,2)),
+    "Teste que anima obstáculos do exemplo 2" ~: [(Rio 2,[Nenhum,Tronco,Tronco,Nenhum,Nenhum]),(Estrada (-1),[Carro,Carro,Nenhum,Carro,Nenhum]),(Relva,[Arvore,Nenhum,Nenhum,Nenhum,Arvore])] ~=? animaObstaculos linhasTeste02 (Jogador (0,4)),
+    "Teste que anima obstáculos do exemplo 3" ~: [(Rio 1,[Nenhum,Nenhum,Nenhum,Tronco,Nenhum]),(Estrada 1,[Nenhum,Carro,Nenhum,Nenhum,Carro]),(Relva,[Arvore,Arvore,Nenhum,Arvore,Nenhum])] ~=? animaObstaculos linhasTeste03 (Jogador (2,1)),
+    "Teste que anima obstáculos do exemplo 4" ~: [(Rio (-1),[Nenhum,Nenhum,Tronco,Tronco,Nenhum]),(Estrada 2,[Carro,Carro,Nenhum,Carro,Nenhum]),(Relva,[Nenhum,Nenhum,Nenhum,Arvore,Arvore])] ~=? animaObstaculos linhasTeste04 (Jogador (1,4)),
+    "Teste que anima obstáculos do exemplo 5" ~: [(Rio (-2),[Tronco,Nenhum,Nenhum,Tronco,Tronco]),(Estrada 3,[Carro,Carro,Nenhum,Nenhum,Nenhum]),(Relva,[Arvore,Nenhum,Arvore,Nenhum,Arvore])] ~=? animaObstaculos linhasTeste05 (Jogador (0,2))
     ]
 
 testsAnimaObstaculoAux = [
-    "Teste para quando os obstáculos pertencem a um rio e a velocidade é positiva" ~: [Tronco,Nenhum,Tronco,Tronco,Nenhum] ~=? animaObstaculoAux 3 obstaculoTeste01 0 ,
-    "Teste para quando os obstáculos pertencem a um rio e a velocidade é negativa" ~: [Tronco,Nenhum,Tronco,Nenhum,Nenhum] ~=? animaObstaculoAux (-1) obstaculoTeste02 0 ,
-    "Teste para quando os obstáculos pertencem a uma estrada e a velocidade é negativa" ~: [Carro,Nenhum,Carro,Nenhum,Nenhum] ~=? animaObstaculoAux (-3) obstaculoTeste03 0 ,
-    "Teste para quando os obstáculos pertencem a uma estrada e a velocidade é positiva" ~: [Carro,Nenhum,Carro,Carro,Nenhum] ~=? animaObstaculoAux 1 obstaculoTeste04 0 ,
-    "Teste para quando a velocidade é nula" ~: [Nenhum,Carro,Nenhum,Carro,Nenhum] ~=? animaObstaculoAux 0 obstaculoTeste05 0
+    "Teste para quando os obstáculos pertencem a um rio e a velocidade é positiva" ~: [Tronco,Nenhum,Tronco,Tronco,Nenhum] ~=? animaObstaculoAux 3 obstaculoTeste01 0 0 False,
+    "Teste para quando os obstáculos pertencem a um rio e a velocidade é negativa" ~: [Tronco,Nenhum,Tronco,Nenhum,Nenhum] ~=? animaObstaculoAux (-1) obstaculoTeste02 0 0 False,
+    "Teste para quando os obstáculos pertencem a uma estrada e a velocidade é negativa" ~: [Carro,Nenhum,Nenhum,Carro,Nenhum] ~=? animaObstaculoAux (-3) obstaculoTeste03 0 0 True,
+    "Teste para quando os obstáculos pertencem a uma estrada e a velocidade é positiva" ~: [Carro,Nenhum,Carro,Carro,Nenhum] ~=? animaObstaculoAux 1 obstaculoTeste04 0 0 False,
+    "Teste para quando a velocidade é nula" ~: [Nenhum,Carro,Nenhum,Carro,Nenhum] ~=? animaObstaculoAux 0 obstaculoTeste05 0 0 True
     ]

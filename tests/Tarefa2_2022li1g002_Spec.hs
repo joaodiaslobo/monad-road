@@ -29,7 +29,7 @@ testsGerarObstaculos = [
 
 testsProximosTerrenosValidos = [
     "Teste para a verificar os terrenos válidos para a extensão do exemplo dado na quarta página do primeiro guião para a seed 43" ~: [Rio 2, Estrada 2, Relva] ~=? proximosTerrenosValidos mapaTeste01 (head (obterRandoms 43 1)),
-    "Teste para verificar os terrenos válidos para a extensão de um mapa de onze linhas e vários obstáculos para a seed 22" ~: [Rio (-3),Estrada (-3)] ~=? proximosTerrenosValidos mapaTeste02 (head (obterRandoms 22 1))
+    "Teste para verificar os terrenos válidos para a extensão de um mapa de onze linhas e vários obstáculos para a seed 22" ~: [Rio (-1),Estrada (-1)] ~=? proximosTerrenosValidos mapaTeste02 (head (obterRandoms 22 1))
     ]
 
 testsProximosObstaculosValidos = [
