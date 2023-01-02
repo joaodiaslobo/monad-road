@@ -51,7 +51,7 @@ larguraMapa = 20
 estadoInicial :: IO Estado
 estadoInicial = do
     seed <- randomRIO (1 :: Int, 100 :: Int)
-    return $ Estado False (MainMenu 0) (Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed (0,0) (alturaMapa + 4) estadoEditorInicial
+    return $ Estado False (MainMenu 0) (Jogo (Jogador (6,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed (0,0) (alturaMapa + 4) estadoEditorInicial
 
 dm :: Display
 dm = InWindow "Monad Road" dimensoesDisplay (0,0)
@@ -71,8 +71,8 @@ taxaUpdate = 50
 drawEstado :: [[Picture]] -> Estado -> IO Picture
 drawEstado ps (Estado _ (MainMenu m) _ _ _ _ _ _ _ _ _) = return $ drawMenu (MainMenu m) ps
 drawEstado ps (Estado debug (JogoCena jn) j@(Jogo p@(Jogador c@(x,y)) m) _ d vivo t s (pt,_) gy _)
-    | debug = return $ Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c d t (pt >= 4 && vivo), drawMuros,drawDebugUI s (x,y) t d (not vivo) gy, drawJogoUI pt jn $ ps !! 4]
-    | otherwise = return $ Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c d t (pt >= 4 && vivo), drawMuros, drawJogoUI pt jn $ ps !! 4]
+    | debug = return $ Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c d t (pt >= 4 && vivo), drawMuros,drawDebugUI s (x,y) t d (not vivo) gy, drawJogoUI pt jn (ps !! 4) (ps !! 5)]
+    | otherwise = return $ Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c d t (pt >= 4 && vivo), drawMuros, drawJogoUI pt jn (ps !! 4) (ps !! 5)]
 drawEstado ps (Estado _ Editor _ _ _ _ _ _ _ _ estadoEditor) = do
     imagensEditor <- editorDeMapasImagens
     return $ desenhaEditor estadoEditor [(ps !! 1),(ps !! 2)] imagensEditor
@@ -82,9 +82,15 @@ drawMenu menu ps =
     case menu of
         MainMenu n -> head ps !! n
 
-drawJogoUI :: Int -> (Int, Int) -> [Picture] -> Picture
-drawJogoUI p (0, _) _ = Translate 0 360 $ Scale 0.5 0.5 $ Text $ show p
-drawJogoUI _ (1, op) ps = ps !! op
+drawJogoUI :: Int -> (Int, Int) -> [Picture] -> [Picture] -> Picture
+drawJogoUI p (0, _) _ ns = Translate 0 360 $ Scale 0.5 0.5 $ drawPontuacao p ns
+drawJogoUI _ (1, op) ps _ = ps !! op
+
+drawPontuacao :: Int -> [Picture] -> Picture
+drawPontuacao pt ps
+ | pt < 10 = ps !! pt
+ | pt < 100 = Translate (-25) 0 $ Pictures [ps !! div pt 10, Translate 68 0 $ ps !! mod pt 10]
+ | otherwise = Translate (-50) 0 $ Pictures [ps !! div (div pt 10) 10, Translate 68 0 $ ps !! mod (div pt 10) 10, Translate 136 0 $ ps !! mod pt 10]
 
 drawDebugUI :: Int -> (Int,Int) -> Int -> Direcao -> Bool -> Int -> Picture
 drawDebugUI s (x,y) t d m gy = Pictures [Translate (-785) 400 $ Scale 0.2 0.2 (Text ("SEED: "++show s)), Translate (-785) 350 $ Scale 0.2 0.2 (Text ("POSICAO: "++show x++", "++show y)), Translate (-785) 300 $ Scale 0.2 0.2 (Text ("DIRECAO: "++show d)), Translate (-785) 250 $ Scale 0.2 0.2 (Text ("MORTO?: "++show m)), Translate (-785) 200 $ Scale 0.2 0.2 (Text ("TICK: "++show t))]
@@ -260,6 +266,17 @@ main = do
     -- Menu Pausa
     Just mp00 <- loadJuicyPNG $ imagensCaminho ++ "ui/pausa/pausa00.png"
     Just mp01 <- loadJuicyPNG $ imagensCaminho ++ "ui/pausa/pausa01.png"
+    -- Números pontuação
+    Just p0 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/0.png"
+    Just p1 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/1.png"
+    Just p2 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/2.png"
+    Just p3 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/3.png"
+    Just p4 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/4.png"
+    Just p5 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/5.png"
+    Just p6 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/6.png"
+    Just p7 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/7.png"
+    Just p8 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/8.png"
+    Just p9 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/9.png"
 
     seed <- randomRIO (1 :: Int, 100 :: Int)
     estado <- estadoInicial
@@ -268,7 +285,7 @@ main = do
         corFundo
         fps
         estado
-        (drawEstado [[mm00, mm01, mm02], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita], [mp00, mp01]])
+        (drawEstado [[mm00, mm01, mm02], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9]])
         inputReage
         tempoReage
 
