@@ -23,7 +23,7 @@ import System.Directory
 import Data.List
 import System.IO
 
-data Cena = MainMenu Int | JogoCena (Int,Int) | Editor deriving (Eq, Show)
+data Cena = MainMenu Int | JogoCena (Int,Int) | Editor | SkinsMenu deriving (Eq, Show)
 
 data Options = Jogar | Sair deriving Show
 
@@ -39,7 +39,8 @@ data Estado = Estado
         seed :: Int,
         pontuacao :: (Int,Int),
         genY :: Int,
-        editor :: EstadoEditor
+        editor :: EstadoEditor,
+        skin :: Int
     } deriving Show
 
 alturaMapa :: Int
@@ -51,7 +52,7 @@ larguraMapa = 20
 estadoInicial :: IO Estado
 estadoInicial = do
     seed <- randomRIO (1 :: Int, 100 :: Int)
-    return $ Estado False (MainMenu 0) (Jogo (Jogador (6,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed (0,0) (alturaMapa + 4) estadoEditorInicial
+    return $ Estado False (MainMenu 0) (Jogo (Jogador (6,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed (0,0) (alturaMapa + 4) estadoEditorInicial 0
 
 dm :: Display
 dm = InWindow "Monad Road" dimensoesDisplay (0,0)
@@ -69,13 +70,17 @@ taxaUpdate :: Int
 taxaUpdate = 50
 
 drawEstado :: [[Picture]] -> Estado -> IO Picture
-drawEstado ps (Estado _ (MainMenu m) _ _ _ _ _ _ _ _ _) = return $ drawMenu (MainMenu m) ps
-drawEstado ps (Estado debug (JogoCena jn) j@(Jogo p@(Jogador c@(x,y)) m) _ d vivo t s (pt,_) gy _)
-    | debug = return $ Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c d t (pt >= 4 && vivo), drawMuros,drawDebugUI s (x,y) t d (not vivo) gy, drawJogoUI pt jn (ps !! 4) (ps !! 5)]
-    | otherwise = return $ Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c d t (pt >= 4 && vivo), drawMuros, drawJogoUI pt jn (ps !! 4) (ps !! 5)]
-drawEstado ps (Estado _ Editor _ _ _ _ _ _ _ _ estadoEditor) = do
+drawEstado ps (Estado _ (MainMenu m) _ _ _ _ _ _ _ _ _ _) = return $ drawMenu (MainMenu m) ps
+drawEstado ps (Estado debug (JogoCena jn) j@(Jogo p@(Jogador c@(x,y)) m) _ d vivo t s (pt,_) gy _ sn)
+    | debug = return $ Pictures [drawJogo [ps !! 1,ps !! 2,ps !! 3] m c d t (pt >= 4 && vivo) sn, drawMuros,drawDebugUI s (x,y) t d (not vivo) gy, drawJogoUI pt jn (ps !! 4) (ps !! 5)]
+    | otherwise = return $ Pictures [drawJogo [ps !! 1,ps !! 2, ps !! 3] m c d t (pt >= 4 && vivo) sn, drawMuros, drawJogoUI pt jn (ps !! 4) (ps !! 5)]
+drawEstado ps (Estado _ Editor _ _ _ _ _ _ _ _ estadoEditor _) = do
     imagensEditor <- editorDeMapasImagens
     return $ desenhaEditor estadoEditor [(ps !! 1),(ps !! 2)] imagensEditor
+drawEstado ps (Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ nSkin) = return $ drawSkinsMenu (head (ps !! 6)) (ps !! 3) nSkin
+
+drawSkinsMenu :: Picture -> [Picture] -> Int -> Picture
+drawSkinsMenu fundo ps n = Pictures [fundo, Scale 5 5 $ ps !! (1 + n*4)]
 
 drawMenu :: Cena -> [[Picture]] -> Picture
 drawMenu menu ps =
@@ -98,8 +103,8 @@ drawDebugUI s (x,y) t d m gy = Pictures [Translate (-785) 400 $ Scale 0.2 0.2 (T
 drawMuros :: Picture
 drawMuros = Pictures [Translate 700 (-465) $ Rotate 64 $ Color corFundo $ rectangleSolid 150 400, Translate (-400) 300 $ Rotate 64 $ Color corFundo $ rectangleSolid 150 400]
 
-drawJogo :: [[Picture]] -> Mapa -> Coordenadas -> Direcao -> Int -> Bool -> Picture
-drawJogo ps m@(Mapa l ls) co@(x,y) d t desliza = Translate (fromIntegral t * dx) (fromIntegral t * dy) $ Translate (fromIntegral alturaMapa * 50 - 900) (fromIntegral alturaMapa * 25 - 600) $ Pictures $ drawMapa (head ps) m (0,400)++drawObstaculos (ps !! 1) m (0,400) t co++[drawJogador (ps !! 2) d co v t]
+drawJogo :: [[Picture]] -> Mapa -> Coordenadas -> Direcao -> Int -> Bool -> Int -> Picture
+drawJogo ps m@(Mapa l ls) co@(x,y) d t desliza sn = Translate (fromIntegral t * dx) (fromIntegral t * dy) $ Translate (fromIntegral alturaMapa * 50 - 900) (fromIntegral alturaMapa * 25 - 600) $ Pictures $ drawMapa (head ps) m (0,400)++drawObstaculos (ps !! 1) m (0,400) t co++[drawJogador (ps !! 2) d co v t sn]
     where v =
             let linha = ls !! y in
             case fst linha of
@@ -107,19 +112,19 @@ drawJogo ps m@(Mapa l ls) co@(x,y) d t desliza = Translate (fromIntegral t * dx)
                 _ -> 0
           (dx, dy) = if desliza then (-1, -0.5) else (0, 0)
 
-drawJogador :: [Picture] -> Direcao -> Coordenadas -> Velocidade -> Int -> Picture
-drawJogador ps d (x,y) 0 _ =
+drawJogador :: [Picture] -> Direcao -> Coordenadas -> Velocidade -> Int -> Int -> Picture
+drawJogador ps d (x,y) 0 _ sn =
     case d of
-        Cima -> Translate  (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 0)
-        Baixo -> Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 1)
-        Esquerda -> Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 2)
-        Direita -> Translate (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 3)
-drawJogador ps d (x,y) v t =
+        Cima -> Translate  (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (0 + 4*sn))
+        Baixo -> Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (1 + 4*sn))
+        Esquerda -> Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (2 + 4*sn))
+        Direita -> Translate (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (3 + 4*sn))
+drawJogador ps d (x,y) v t sn =
     case d of
-        Cima -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate  (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 0)
-        Baixo -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 1)
-        Esquerda -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 2)
-        Direita -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! 3)
+        Cima -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate  (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (0 + 4*sn))
+        Baixo -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (1 + 4*sn))
+        Esquerda -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50)))  (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (2 + 4*sn))
+        Direita -> Translate (fromIntegral $ t * v) (fromIntegral (t * v) * (- 0.5)) $ Translate (fromIntegral (x * 50 + y * (-50))) (400 - 25 * fromIntegral y - 25 * fromIntegral x) (ps !! (3 + 4*sn))
 
 drawMapa :: [Picture] -> Mapa -> (Float,Float) -> [Picture]
 drawMapa _ (Mapa la []) _ = []
@@ -159,57 +164,62 @@ drawLinhaObstaculo ps obs@(h:t) (x,y) v ti p =
 inputReage :: Event -> Estado -> IO Estado
 
 -- INPUT DEBUG
-inputReage (EventKey (Char 'l') Down _ _) estado@(Estado d _ _ _ _ _ _ _ _ _ _) = return estado{ debug = not d }
+inputReage (EventKey (Char 'l') Down _ _) estado@(Estado d _ _ _ _ _ _ _ _ _ _ _) = return estado{ debug = not d }
 
 -- INPUT MAIN MENU
-inputReage (EventKey (SpecialKey KeyRight) Down _ _) estado@(Estado _ (MainMenu n) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu (proximoN n 3 1) }
-inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ (MainMenu n) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu (proximoN n 3 (-1)) }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 3) _ _ _ _ _ _ _ _ _) = do
+inputReage (EventKey (SpecialKey KeyRight) Down _ _) estado@(Estado _ (MainMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu (proximoN n 3 1) }
+inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ (MainMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu (proximoN n 3 (-1)) }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 3) _ _ _ _ _ _ _ _ _ _) = do
     putStr "Jogo encerrado."
     exitSuccess
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 1) _ _ _ _ _ _ _ _ _) = return estado{ cena = Editor }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 0) _ _ _ _ _ _ _ _ _) = return estado{ cena = JogoCena (0, 0) }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 1) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = Editor }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 0) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = SkinsMenu }
+
+-- INPUT MENU SKINS
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ _) = return estado{ cena = JogoCena (0, 0) }
+inputReage (EventKey (SpecialKey KeyRight) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ n) = return estado{ skin = proximoN n 3 1 }
+inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ SkinsMenu _ _ _ _ _ _ _ _ _ n) = return estado{ skin = proximoN n 3 (-1) }
 
 -- INPUT JOGO PRINCIPAL
-inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ _ s _ _ _) = return estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
-inputReage (EventKey (SpecialKey KeyLeft)  Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _) = return estado{ movimento = Move Esquerda, direcao = Esquerda }
-inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _) = return estado{ movimento = Move Cima, direcao = Cima }
-inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _) = return estado{ movimento = Move Baixo, direcao = Baixo }
-inputReage (EventKey (SpecialKey KeyRight)  Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _) = return estado{ movimento = Move Direita, direcao = Direita }
-inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ (JogoCena (jn,_)) _ _ _ _ t _ _ _ _) = return estado{ cena = JogoCena (abs (jn - 1),0) }
+inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ _ s _ _ _ _) = return estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
+inputReage (EventKey (SpecialKey KeyLeft)  Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _ _) = return estado{ movimento = Move Esquerda, direcao = Esquerda }
+inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _ _) = return estado{ movimento = Move Cima, direcao = Cima }
+inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _ _) = return estado{ movimento = Move Baixo, direcao = Baixo }
+inputReage (EventKey (SpecialKey KeyRight)  Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _ _) = return estado{ movimento = Move Direita, direcao = Direita }
+inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ (JogoCena (jn,_)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (abs (jn - 1),0) }
 
 -- INPUT MENU DE PAUSA
-inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (JogoCena (1,n)) _ _ _ _ t _ _ _ _) = return estado{ cena = JogoCena (1 ,proximoN n 1 (-1)) }
-inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (JogoCena (1,n)) _ _ _ _ t _ _ _ _) = return estado{ cena = JogoCena (1 ,proximoN n 1 1) }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (1,0)) _ _ _ _ t _ _ _ _) = return estado{ cena = JogoCena (0 , 0) }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (1,1)) _ _ _ _ t _ _ _ _) = do estadoInicial;
+inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (JogoCena (1,n)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (1 ,proximoN n 1 (-1)) }
+inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (JogoCena (1,n)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (1 ,proximoN n 1 1) }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (1,0)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (0 , 0) }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (1,1)) _ _ _ _ t _ _ _ _ _) = do estadoInicial;
 -- INPUT EDITOR DE MAPAS
-inputReage (EventKey (Char 'w') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _)) = return estado{ editor = editor{objeto = (x, proximoN y (alturaMapaEditor - 1) (-1)) }}
-inputReage (EventKey (Char 's') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _)) = return estado{ editor = editor{objeto = (x, proximoN y (alturaMapaEditor - 1) 1) }}
-inputReage (EventKey (Char 'd') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _)) = return estado{ editor = editor{objeto = (proximoN x (larguraMapaEditor - 1) 1, y) }}
-inputReage (EventKey (Char 'a') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _)) = return estado{ editor = editor{objeto = (proximoN x (larguraMapaEditor - 1) (-1), y) }}
-inputReage (EventKey (SpecialKey KeySpace)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ tool item coord False _ (False, _) _)) = return estado{ editor = editor{ chunks = editaChunk chunks coord tool item } }
-inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ False _ (False, _) _)) = return estado{ editor = estadoEditorInicial, cena = MainMenu 0 }
-inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True _ _ _)) = return estado{ editor = editor{ receberInput = False, nomeFicheiro = ""} }
-inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ False _ (True, _) _)) = return estado{ editor = editor{ receberSelectMapa = (False, 0), mapasGuardados = []} }
-inputReage (EventKey (Char '+')  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ (cx,cy,scale) _ _ _ False _ (False, _) _)) = return estado{ editor = editor{ camera = (cx, cy, scale + scale / 2)} }
-inputReage (EventKey (Char '-')  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ (cx,cy,scale) _ _ _ False _ (False, _) _)) = return estado{ editor = editor{ camera = (cx, cy, scale - scale / 2)} }
-inputReage (EventKey (SpecialKey KeyRight)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ n _ _ False _ (False, _) _)) = return estado{ editor = editor{ toolbar = proximoN n 1 1, itemSelecionado = 0 } }
-inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ n _ _ False _ (False, _) _)) = return estado{ editor = editor{ toolbar = proximoN n 1 1, itemSelecionado = 0} }
-inputReage (EventKey (SpecialKey KeyUp)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (False, _) _)) = return estado{ editor = editor{ itemSelecionado = proximoN n 2 (-1) } }
-inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (False, _) _)) = return estado{ editor = editor{ itemSelecionado = proximoN n 2 1} }
-inputReage (EventKey (Char c) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True t (False, _) _)) = return estado{ editor = editor{ nomeFicheiro = t++[c]}}
-inputReage (EventKey (SpecialKey KeyBackspace) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True t (False, _) _)) = return estado{ editor = editor{ nomeFicheiro = drop 1 t}}
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True t (False, _) _)) = return estado{ editor = editor{ receberInput = False }}
-inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False _ (False, _) _)) = return estado{ editor = editor{ receberInput = True }}
-inputReage (EventKey (Char 'c') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False _ (False, _) _)) =
+inputReage (EventKey (Char 'w') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _) _) = return estado{ editor = editor{objeto = (x, proximoN y (alturaMapaEditor - 1) (-1)) }}
+inputReage (EventKey (Char 's') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _) _) = return estado{ editor = editor{objeto = (x, proximoN y (alturaMapaEditor - 1) 1) }}
+inputReage (EventKey (Char 'd') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _) _) = return estado{ editor = editor{objeto = (proximoN x (larguraMapaEditor - 1) 1, y) }}
+inputReage (EventKey (Char 'a') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _) _) = return estado{ editor = editor{objeto = (proximoN x (larguraMapaEditor - 1) (-1), y) }}
+inputReage (EventKey (SpecialKey KeySpace)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ tool item coord False _ (False, _) _) _) = return estado{ editor = editor{ chunks = editaChunk chunks coord tool item } }
+inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ False _ (False, _) _) _) = return estado{ editor = estadoEditorInicial, cena = MainMenu 0 }
+inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True _ _ _) _) = return estado{ editor = editor{ receberInput = False, nomeFicheiro = ""} }
+inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ False _ (True, _) _) _) = return estado{ editor = editor{ receberSelectMapa = (False, 0), mapasGuardados = []} }
+inputReage (EventKey (Char '+')  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ (cx,cy,scale) _ _ _ False _ (False, _) _) _) = return estado{ editor = editor{ camera = (cx, cy, scale + scale / 2)} }
+inputReage (EventKey (Char '-')  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ (cx,cy,scale) _ _ _ False _ (False, _) _) _) = return estado{ editor = editor{ camera = (cx, cy, scale - scale / 2)} }
+inputReage (EventKey (SpecialKey KeyRight)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ n _ _ False _ (False, _) _) _) = return estado{ editor = editor{ toolbar = proximoN n 1 1, itemSelecionado = 0 } }
+inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ n _ _ False _ (False, _) _) _) = return estado{ editor = editor{ toolbar = proximoN n 1 1, itemSelecionado = 0} }
+inputReage (EventKey (SpecialKey KeyUp)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (False, _) _) _) = return estado{ editor = editor{ itemSelecionado = proximoN n 2 (-1) } }
+inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (False, _) _) _) = return estado{ editor = editor{ itemSelecionado = proximoN n 2 1} }
+inputReage (EventKey (Char c) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True t (False, _) _) _) = return estado{ editor = editor{ nomeFicheiro = t++[c]}}
+inputReage (EventKey (SpecialKey KeyBackspace) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True t (False, _) _) _) = return estado{ editor = editor{ nomeFicheiro = drop 1 t}}
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ True t (False, _) _) _) = return estado{ editor = editor{ receberInput = False }}
+inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False _ (False, _) _) _) = return estado{ editor = editor{ receberInput = True }}
+inputReage (EventKey (Char 'c') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False _ (False, _) _) _) =
     do
         nomeMapas <- nomeMapasGuardados
         return estado{ editor = editor{ receberSelectMapa = (True, 0), mapasGuardados = nomeMapas}}
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ False _ (True, n) _)) = return estado{ editor = editor{ receberSelectMapa = (False, n) }}
-inputReage (EventKey (SpecialKey KeyUp)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (True, index) ns)) = return estado{ editor = editor{ receberSelectMapa = (True, proximoN index (length ns - 1) (-1)) } }
-inputReage (EventKey (SpecialKey KeyDown)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (True, index) ns)) = return estado{ editor = editor{ receberSelectMapa = (True, proximoN index (length ns - 1) (1)) } }
-inputReage (EventKey (Char 'p') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False _ (False, _) _)) = if chunksProntos chunks then return estado{ jogo = Jogo (Jogador (0,alturaMapaEditor-1)) (chunksParaMapa chunks), cena = (JogoCena (0,0)), editor = estadoEditorInicial } else return estado
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ _ False _ (True, n) _) _) = return estado{ editor = editor{ receberSelectMapa = (False, n) }}
+inputReage (EventKey (SpecialKey KeyUp)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (True, index) ns) _) = return estado{ editor = editor{ receberSelectMapa = (True, proximoN index (length ns - 1) (-1)) } }
+inputReage (EventKey (SpecialKey KeyDown)  Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ n _ False _ (True, index) ns) _) = return estado{ editor = editor{ receberSelectMapa = (True, proximoN index (length ns - 1) (1)) } }
+inputReage (EventKey (Char 'p') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False _ (False, _) _) _) = if chunksProntos chunks then return estado{ jogo = Jogo (Jogador (6,alturaMapaEditor-1)) (chunksParaMapa chunks), cena = (JogoCena (0,0)), editor = estadoEditorInicial } else return estado
 
 inputReage _ e = return e
 
@@ -220,13 +230,13 @@ proximoN c max i
   | otherwise = c + i
 
 tempoReage :: Float -> Estado -> IO Estado
-tempoReage f estado@(Estado _ (JogoCena (0,_)) jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) movimento _ vivo t seed (pt,auxPt) gy _)
+tempoReage f estado@(Estado _ (JogoCena (0,_)) jogo@(Jogo j@(Jogador (x,y)) m@(Mapa _ ls)) movimento _ vivo t seed (pt,auxPt) gy _ _)
     | t == taxaUpdate && vivo = let novoJogo = animaJogo jogo Parado; desliza = pt >= 4 in return estado{ jogo = if not desliza then novoJogo else deslizaJogo (randoms (mkStdGen seed) !! gy)  novoJogo, tick = 0, vivo = not $ jogoTerminou novoJogo, genY = if desliza then gy + 1 else gy}
     | t == taxaUpdate = return estado{tick = 0, jogo = jogo}
     | movimento /= Parado = let jogador@(Jogador (xx,yy)) = if t > div taxaUpdate 2 then moveJogador j movimento $ arranjaRios (obterLinhas $ animaJogo jogo Parado) else moveJogador j movimento $ arranjaRios ls; novoJogo = Jogo jogador m; novoAuxPt = if yy < y then auxPt + 1 else if yy > y then auxPt - 1 else auxPt; in
         return estado{ jogo = novoJogo, movimento = Parado, tick = t+1, vivo = not $ jogoTerminou novoJogo, pontuacao = if novoAuxPt > 0 then (pt + 1,0) else (pt,novoAuxPt)}
     | otherwise = return estado{ tick = t+1 }
-tempoReage _ estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False t (False, s) ns))
+tempoReage _ estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor chunks _ _ _ _ _ False t (False, s) ns) _)
     | t /= "" = do
         writeFile (t++".mapa") (show chunks)
         putStr "O mapa que estava a ser editado foi gravado"
@@ -247,6 +257,8 @@ main = do
     Just mm01 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu01.png"
     Just mm02 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu02.png"
     Just mm03 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu03.png"
+    -- Skins Menu
+    Just sm <- loadJuicyPNG $ imagensCaminho ++ "ui/skinsmenu/skinsmenu.png"
     -- Terrenos
     Just relva <- loadJuicyPNG $ imagensCaminho ++ "terreno/relva.png"
     Just rio <- loadJuicyPNG $ imagensCaminho ++ "terreno/rio.png"
@@ -258,10 +270,22 @@ main = do
     Just carroDireita <- loadJuicyPNG $ imagensCaminho ++ "obstaculos/estrada/carroDireita.png"
     Just carroEsquerda <- loadJuicyPNG $ imagensCaminho ++ "obstaculos/estrada/carroEsquerda.png"
     -- Jogador
-    Just galinhaCima <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaCima.png"
-    Just galinhaBaixo <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaBaixo.png"
-    Just galinhaEsquerda <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaEsquerda.png"
-    Just galinhaDireita <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinhaDireita.png"
+    Just galinhaCima <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinha/galinhaCima.png"
+    Just galinhaBaixo <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinha/galinhaBaixo.png"
+    Just galinhaEsquerda <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinha/galinhaEsquerda.png"
+    Just galinhaDireita <- loadJuicyPNG $ imagensCaminho ++ "jogador/galinha/galinhaDireita.png"
+    Just caoCima <- loadJuicyPNG $ imagensCaminho ++ "jogador/cao/caoCima.png"
+    Just caoBaixo <- loadJuicyPNG $ imagensCaminho ++ "jogador/cao/caoBaixo.png"
+    Just caoEsquerda <- loadJuicyPNG $ imagensCaminho ++ "jogador/cao/caoEsquerda.png"
+    Just caoDireita <- loadJuicyPNG $ imagensCaminho ++ "jogador/cao/caoDireita.png"
+    Just ninjaCima <- loadJuicyPNG $ imagensCaminho ++ "jogador/ninja/ninjaCima.png"
+    Just ninjaBaixo <- loadJuicyPNG $ imagensCaminho ++ "jogador/ninja/ninjaBaixo.png"
+    Just ninjaEsquerda <- loadJuicyPNG $ imagensCaminho ++ "jogador/ninja/ninjaEsquerda.png"
+    Just ninjaDireita <- loadJuicyPNG $ imagensCaminho ++ "jogador/ninja/ninjaDireita.png"
+    Just xadrezCima <- loadJuicyPNG $ imagensCaminho ++ "jogador/xadrez/xadrezCima.png"
+    Just xadrezBaixo <- loadJuicyPNG $ imagensCaminho ++ "jogador/xadrez/xadrezBaixo.png"
+    Just xadrezEsquerda <- loadJuicyPNG $ imagensCaminho ++ "jogador/xadrez/xadrezEsquerda.png"
+    Just xadrezDireita <- loadJuicyPNG $ imagensCaminho ++ "jogador/xadrez/xadrezDireita.png"
     -- Menu Pausa
     Just mp00 <- loadJuicyPNG $ imagensCaminho ++ "ui/pausa/pausa00.png"
     Just mp01 <- loadJuicyPNG $ imagensCaminho ++ "ui/pausa/pausa01.png"
@@ -284,7 +308,7 @@ main = do
         corFundo
         fps
         estado
-        (drawEstado [[mm00, mm01, mm02, mm03], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9]])
+        (drawEstado [[mm00, mm01, mm02, mm03], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita, caoCima, caoBaixo, caoEsquerda, caoDireita, ninjaCima, ninjaBaixo, ninjaEsquerda, ninjaDireita, xadrezCima, xadrezBaixo, xadrezEsquerda, xadrezDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9], [sm]])
         inputReage
         tempoReage
 
