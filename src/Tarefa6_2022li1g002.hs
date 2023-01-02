@@ -437,7 +437,9 @@ main = do
         inputReage
         tempoReage
 
-atualizaRecorde :: Int -> IO Int
+{- | A função 'atualizaRecorde' permite guardar a pontuação mais elevada do utilizador até ao momento num ficheiro highscore.save. -}
+atualizaRecorde :: Int -- ^Nova pontuação obtida.
+    -> IO Int -- ^Melhor pontuação.
 atualizaRecorde n = do
     ficheiroExiste <- doesFileExist "highscore.save"
     ficheiro <- if ficheiroExiste then readFile "highscore.save"
