@@ -11,5 +11,8 @@ module Tarefa5_2022li1g002 where
 import LI12223
 import Tarefa2_2022li1g002 (estendeMapa)
 
-deslizaJogo :: Int -> Jogo -> Jogo
+{- | A função 'deslizaJogo' permite que o jogo vá avançando a nível de linhas, sendo o mapa renovado, eliminando a linha mais abaixo e gerando uma nova no topo do mapa, sucessivamente. -}
+deslizaJogo :: Int -- ^Seed. 
+    -> Jogo -- ^Jogo que irá ser deslizado.
+    -> Jogo -- ^Jogo depois de ser deslizado, retirando a linha mais abaixo e adicionando uma nova no topo.
 deslizaJogo s (Jogo (Jogador (x,y)) (Mapa larg l)) = Jogo (Jogador (x,y+1)) (estendeMapa (Mapa larg (init l)) s)
