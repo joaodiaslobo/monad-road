@@ -162,11 +162,9 @@ inputReage :: Event -> Estado -> IO Estado
 inputReage (EventKey (Char 'l') Down _ _) estado@(Estado d _ _ _ _ _ _ _ _ _ _) = return estado{ debug = not d }
 
 -- INPUT MAIN MENU
-inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (MainMenu 0) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 1 }
-inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (MainMenu 1) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 0 }
-inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (MainMenu 1) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 2 }
-inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (MainMenu 2) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 1 }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 2) _ _ _ _ _ _ _ _ _) = do
+inputReage (EventKey (SpecialKey KeyRight) Down _ _) estado@(Estado _ (MainMenu n) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu (proximoN n 3 1) }
+inputReage (EventKey (SpecialKey KeyLeft) Down _ _) estado@(Estado _ (MainMenu n) _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu (proximoN n 3 (-1)) }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 3) _ _ _ _ _ _ _ _ _) = do
     putStr "Jogo encerrado."
     exitSuccess
 inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (MainMenu 1) _ _ _ _ _ _ _ _ _) = return estado{ cena = Editor }
@@ -245,9 +243,10 @@ corFundo = makeColor (79/255) (112/255) (126/255) 1
 main :: IO()
 main = do
     -- Main Menu
-    Just mm00 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu00.png"
-    Just mm01 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu01.png"
-    Just mm02 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu02.png"
+    Just mm00 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu00.png"
+    Just mm01 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu01.png"
+    Just mm02 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu02.png"
+    Just mm03 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu03.png"
     -- Terrenos
     Just relva <- loadJuicyPNG $ imagensCaminho ++ "terreno/relva.png"
     Just rio <- loadJuicyPNG $ imagensCaminho ++ "terreno/rio.png"
@@ -285,7 +284,7 @@ main = do
         corFundo
         fps
         estado
-        (drawEstado [[mm00, mm01, mm02], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9]])
+        (drawEstado [[mm00, mm01, mm02, mm03], [relva,rio,estrada,nenhum], [arvore, tronco, carroDireita, carroEsquerda], [galinhaCima, galinhaBaixo, galinhaEsquerda, galinhaDireita], [mp00, mp01], [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9]])
         inputReage
         tempoReage
 
