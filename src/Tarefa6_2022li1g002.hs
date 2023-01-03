@@ -61,7 +61,7 @@ larguraMapa = 20
 estadoInicial :: IO Estado
 estadoInicial = do
     seed <- randomRIO (1 :: Int, 100 :: Int)
-    return $ Estado False (MainMenu 0) (Jogo (Jogador (6,alturaMapa)) (geraMapa larguraMapa alturaMapa 1)) Parado Cima True 0 seed (0,0) (alturaMapa + 4) estadoEditorInicial 0
+    return $ Estado False (MainMenu 0) (Jogo (Jogador (6,alturaMapa)) (geraMapa larguraMapa alturaMapa seed)) Parado Cima True 0 seed (0,0) (alturaMapa + 4) estadoEditorInicial 0
 
 {- | Define o display da aplicação Gloss. -}
 dm :: Display
@@ -275,6 +275,7 @@ inputReage (EventKey (SpecialKey KeyEsc) Down _ _) estado@(Estado _ SkinsMenu _ 
 inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = InfoMenu $ proximoN n 3 (-1) }
 inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = InfoMenu $ proximoN n 3 1 }
 inputReage (EventKey (SpecialKey KeyEsc) Down _ _) estado@(Estado _ (InfoMenu n) _ _ _ _ _ _ _ _ _ _) = return estado{ cena = MainMenu 0 }
+
 -- INPUT JOGO PRINCIPAL
 inputReage (EventKey (Char 'g') Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ _ s _ _ _ _) = return estado{ jogo = Jogo (Jogador (0,alturaMapa)) (geraMapa larguraMapa alturaMapa (s+1)), seed = 1+s, tick = 0, vivo = True }
 inputReage (EventKey (SpecialKey KeyLeft)  Down _ _) estado@(Estado _ (JogoCena (0,_)) _ _ _ _ t _ _ _ _ _) = return estado{ movimento = Move Esquerda, direcao = Esquerda }
@@ -287,14 +288,13 @@ inputReage (EventKey (SpecialKey KeyEsc)  Down _ _) estado@(Estado _ (JogoCena (
 inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (JogoCena (1,n)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (1 ,proximoN n 1 (-1)) }
 inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (JogoCena (1,n)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (1 ,proximoN n 1 1) }
 inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (1,0)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (0 , 0) }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (1,1)) _ _ _ _ t _ _ _ _ _) = do estadoInicial;
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (1,1)) _ _ _ _ t s _ _ _ _) = do estadoInicial;
 
 -- INPUT GAME OVER
 inputReage (EventKey (SpecialKey KeyUp) Down _ _) estado@(Estado _ (JogoCena (2,n)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (2 ,proximoN n 1 (-1)) }
 inputReage (EventKey (SpecialKey KeyDown) Down _ _) estado@(Estado _ (JogoCena (2,n)) _ _ _ _ t _ _ _ _ _) = return estado{ cena = JogoCena (2 ,proximoN n 1 1) }
-inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (2,0)) _ _ _ _ t _ _ _ _ _) = do novo <- estadoInicial; return novo{ cena = JogoCena (0 , 0) }
+inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (2,0)) _ _ _ _ t _ _ _ _ _) = do novo <- estadoInicial; return novo{ cena = JogoCena (0 , 0)}
 inputReage (EventKey (SpecialKey KeyEnter) Down _ _) estado@(Estado _ (JogoCena (2,1)) _ _ _ _ t _ _ _ _ _) = do estadoInicial;
-
 
 -- INPUT EDITOR DE MAPAS
 inputReage (EventKey (Char 'w') Down _ _) estado@(Estado _ Editor _ _ _ _ _ _ _ _ editor@(EstadoEditor _ _ _ _ _ (x,y) False _ (False, _) _) _) = return estado{ editor = editor{objeto = (x, proximoN y (alturaMapaEditor - 1) (-1)) }}
@@ -426,7 +426,6 @@ main = do
     Just p8 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/8.png"
     Just p9 <- loadJuicyPNG $ imagensCaminho ++ "ui/numeros/9.png"
 
-    seed <- randomRIO (1 :: Int, 100 :: Int)
     estado <- estadoInicial
 
     playIO dm
