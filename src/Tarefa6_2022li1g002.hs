@@ -147,7 +147,7 @@ drawDebugUI s (x,y) t d m gy = Pictures [Translate (-785) 400 $ Scale 0.2 0.2 (T
 
 {- | A função 'drawMuros' desenha umas barreiras à volta do mapa para esconder alguns obstáculos que ao serem animados passam pelas bordas do mapa. -}
 drawMuros :: Picture
-drawMuros = Pictures [Translate 0 370 $ Rotate 63 $ Color corFundo $ rectangleSolid 150 2000, Translate (-400) 300 $ Rotate 64 $ Color corFundo $ rectangleSolid 150 400]
+drawMuros = Pictures [Translate 0 370 $ Rotate 63 $ Color corFundo $ rectangleSolid 150 2000, Translate 700 (-465) $ Rotate 64 $ Color corFundo $ rectangleSolid 150 2000]
 
 {- | A função 'drawJogo' desenha o jogo principal da aplicação, utiliza as funções auxiliares 'drawJogador', 'drawMapa' e 'drawObstaculos'. É também encarregue do deslize suave do mapa. -}
 drawJogo :: [[Picture]] -- ^ Lista de imagens do jogo. 
