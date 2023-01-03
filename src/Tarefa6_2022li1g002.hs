@@ -367,8 +367,8 @@ corFundo = makeColor (79/255) (112/255) (126/255) 1
 {- | A função 'main' carrega todas as imagens para a memória da aplicação e chama a função 'playIO' do Gloss. 
 Para carregar imagens do tipo .png (ao contrário de .bmp), decidimos utlizar uma biblioteca externa 'Graphics.Gloss.Juicy'.
 -}
-main :: IO()
-main = do
+jogoLoop :: IO()
+jogoLoop = do
     -- Main Menu
     Just mm00 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu00.png"
     Just mm01 <- loadJuicyPNG $ imagensCaminho ++ "ui/mainmenu/mainmenu01.png"
