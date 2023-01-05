@@ -1,10 +1,10 @@
 {- |
 Module      : LI12223
 Description : Módulo auxiliar para LI1 22/23.
-Copyright   : Manuel Barros <d13242@di.uminho.pt>
+Copyright   : Manuel Barros  <d13242@di.uminho.pt>
               Nelson Estevão <d12733@di.uminho.pt>
-              Olga Pacheco <omp@di.uminho.pt>
-              Xavier Pinho <d12736@di.uminho.pt>
+              Olga Pacheco   <omp@di.uminho.pt>
+              Xavier Pinho   <d12736@di.uminho.pt>
 
 Tipos de dados e funções auxiliares para a realização do projeto de LI1 em 2022/23.
  -}
@@ -14,7 +14,7 @@ module LI12223 (
   Coordenadas , Largura , Velocidade,
   -- ** Mapas
   Mapa(..), Terreno(..), Obstaculo(..),
-    -- ** Jogo
+  -- ** Jogo
   Jogo(..), Jogador(..), Direcao(..), Jogada(..)
   ) where
 
@@ -29,7 +29,7 @@ data Terreno
   = Rio Velocidade
   | Estrada Velocidade
   | Relva
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 
 -- | Um Obstáculo numa linha de um 'Mapa'.
 data Obstaculo
@@ -37,7 +37,7 @@ data Obstaculo
   | Tronco -- ^ os troncos deslizam apenas em 'Rio'
   | Carro -- ^ os carros movimentam-se apenas em 'Estrada'
   | Arvore -- ^ as árvores são um obstáculo fixo que não se move e apenas são possíveis em 'Relva'
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 
 -- | Comprimento de um 'Mapa'.
 type Largura = Int
