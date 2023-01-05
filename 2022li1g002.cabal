@@ -8,8 +8,7 @@ version:            0.1.0.0
 -- A longer description of the package.
 -- description:
 
-author:             João d'Araújo Dias Lobo <a104356@alunos.uminho.pt>
-                    Rita da Cunha Camacho <a104439@alunos.uminho.pt>
+author:             Nelson Estevão <d12733@di.uminho.pt>
 
 library
   exposed-modules:
@@ -30,23 +29,19 @@ executable 2022li1g002
     Tarefa2_2022li1g002
     Tarefa3_2022li1g002
     Tarefa4_2022li1g002
-  build-depends:    base ^>=4.16.3.0, random, random
+  build-depends:    base ^>=4.16.3.0, random
   hs-source-dirs:   src
   default-language: Haskell2010
 
 test-suite 2022li1g002-tests
   type:                 exitcode-stdio-1.0
-  main-is:              Spec.hs
+  main-is:              Fase1.hs
   other-modules:
     LI12223
     Tarefa1_2022li1g002
     Tarefa2_2022li1g002
     Tarefa3_2022li1g002
     Tarefa4_2022li1g002
-    Tarefa1_2022li1g002_Spec
-    Tarefa2_2022li1g002_Spec
-    Tarefa3_2022li1g002_Spec
-    Tarefa4_2022li1g002_Spec
-  build-depends:        base ^>=4.16.3.0, directory, random, HUnit
+  build-depends:        base ^>=4.16.3.0, random, directory, HUnit
   hs-source-dirs:       tests src
   default-language:     Haskell2010
