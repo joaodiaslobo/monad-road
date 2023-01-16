@@ -1,20 +1,11 @@
-# Laboratórios de Informática I
+![Monad Road](assets/images/logo.png)
+#
 
-## Repositório
+Clone do jogo [Crossy Road](https://en.wikipedia.org/wiki/Crossy_Road) em Haskell, usando a biblioteca [Gloss](http://gloss.ouroborus.net/), realizado no âmbito de Laboratórios de Informática I, cadeira do primeiro semestre do primeiro ano da Licenciatura em Engenharia Informática da Universidade do Minho.
 
-Se tiver chave SSH configurada no GitLab pode fazer clone com o seguinte link:
+![Jogo](assets/images/screenshots/jogo.png)
 
-```bash
-$ git clone git@gitlab.com:uminho-di/li1/2223/2022li1g002.git
-$ cd 2022li1g002
-```
-
-Alternativamente, pode fazer clone por https com o seguinte link:
-
-```bash
-$ git clone https://gitlab.com/uminho-di/li1/2223/projetos/2022li1g002.git
-$ cd 2022li1g002
-```
+![Editor](assets/images/screenshots/editor.png)
 
 ## Interpretador
 
@@ -34,7 +25,7 @@ $ ghci -i="src" -i="tests" src/Main.hs
 
 ## Testes
 
-O projecto utiliza a biblioteca [HUnit](https://hackage.haskell.org/package/HUnit) para fazer testes unitários.
+O projeto utiliza a biblioteca [HUnit](https://hackage.haskell.org/package/HUnit) para fazer testes unitários.
 
 Pode correr os testes utilizando uma das seguintes alternativas:
 
@@ -52,6 +43,7 @@ $ ghci -i="src" -i="tests" tests/Spec.hs
 >>> runTestsT2 -- Correr os testes tarefa 2
 >>> runTestsT3 -- Correr os testes tarefa 3
 >>> runTestsT4 -- Correr os testes tarefa 4
+>>> runTestsT5 -- Correr os testes tarefa 5
 >>> main -- Correr todos os testes
 ```
 
@@ -79,5 +71,5 @@ $ haddock -h -o doc/html src/*.hs
 
 ## Grupo 2
 
-- **A104356** João d'Araújo Dias Lobo;
-- **A104439** Rita da Cunha Camacho;
+- **A104356** [João d'Araújo Dias Lobo](https://github.com/joaodiaslobo)
+- **A104439** [Rita da Cunha Camacho](https://github.com/ritacamacho)
