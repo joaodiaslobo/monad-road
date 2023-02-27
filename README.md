@@ -1,7 +1,7 @@
 ![Monad Road](assets/images/logo.png)
 #
 
-Clone do jogo [Crossy Road](https://en.wikipedia.org/wiki/Crossy_Road) em Haskell, usando a biblioteca [Gloss](http://gloss.ouroborus.net/), realizado no âmbito de Laboratórios de Informática I, cadeira do primeiro semestre do primeiro ano da Licenciatura em Engenharia Informática da Universidade do Minho.
+Clone do jogo [Crossy Road](https://en.wikipedia.org/wiki/Crossy_Road) em Haskell, usando a biblioteca [Gloss](http://gloss.ouroborus.net/), realizado no âmbito de Laboratórios de Informática I, cadeira do primeiro semestre do primeiro ano da licenciatura em Engenharia Informática da Universidade do Minho.
 
 ![Jogo](assets/images/screenshots/jogo.png)
 
