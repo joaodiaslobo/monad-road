@@ -3,7 +3,7 @@
 
 Clone of the game [Crossy Road](https://en.wikipedia.org/wiki/Crossy_Road) in Haskell, using the [Gloss](http://gloss.ouroborus.net/) library! Developed as a project for the IT Laboratories I (Laboratórios de Informática I) class, part of the first year's curriculum of the Software Engineering degree at University of Minho.
 
-This project achieved a final grade of **20/20** ✨
+This project obtained a final grade of **20/20** ✨
 
 ![Game](assets/images/screenshots/jogo.png)
 
