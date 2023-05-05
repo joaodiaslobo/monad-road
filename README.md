@@ -1,75 +1,77 @@
 ![Monad Road](assets/images/logo.png)
 #
 
-Clone do jogo [Crossy Road](https://en.wikipedia.org/wiki/Crossy_Road) em Haskell, usando a biblioteca [Gloss](http://gloss.ouroborus.net/), realizado no âmbito de Laboratórios de Informática I, cadeira do primeiro semestre do primeiro ano da licenciatura em Engenharia Informática da Universidade do Minho.
+Clone of the game [Crossy Road](https://en.wikipedia.org/wiki/Crossy_Road) in Haskell, using the [Gloss](http://gloss.ouroborus.net/) library! Developed as a project for the IT Laboratories I (Laboratórios de Informática I) class, part of the first year's curriculum of the Software Engineering degree at University of Minho.
 
-![Jogo](assets/images/screenshots/jogo.png)
+This project achieved a final grade of **20/20** ✨
+
+![Game](assets/images/screenshots/jogo.png)
 
 ![Editor](assets/images/screenshots/editor.png)
 
-## Interpretador
+## Interpreter
 
-Pode abrir o interpretador do Haskell (GHCi) utilizando o cabal ou diretamente.
+You can open the Haskell (GHCi) interpreter using cabal or directly.
 
-1. Usando o cabal
+1. Using `cabal`
 
 ```bash
 $ cabal repl
 ```
 
-2. Usando o GHCi
+2. Using GHCi
 
 ```bash
 $ ghci -i="src" -i="tests" src/Main.hs
 ```
 
-## Testes
+## Tests
 
-O projeto utiliza a biblioteca [HUnit](https://hackage.haskell.org/package/HUnit) para fazer testes unitários.
+This project uses the [HUnit](https://hackage.haskell.org/package/HUnit) library to build unit tests.
 
-Pode correr os testes utilizando uma das seguintes alternativas:
+You can run the tests using any of the following alternatives:
 
-1. Usando o `cabal`
+1. Using `cabal`
 
 ```bash
 $ cabal test
 ```
 
-2. Usando o GHCi
+2. Using GHCi
 
 ```bash
 $ ghci -i="src" -i="tests" tests/Spec.hs
->>> runTestsT1 -- Correr os testes tarefa 1
->>> runTestsT2 -- Correr os testes tarefa 2
->>> runTestsT3 -- Correr os testes tarefa 3
->>> runTestsT4 -- Correr os testes tarefa 4
->>> runTestsT5 -- Correr os testes tarefa 5
->>> main -- Correr todos os testes
+>>> runTestsT1 -- Run first task's tests
+>>> runTestsT2 -- Run second task's tests
+>>> runTestsT3 -- Run third task's tests
+>>> runTestsT4 -- Run fourth task's tests
+>>> runTestsT5 -- Run fifth task's tests
+>>> main -- Run all tests
 ```
 
-3. Usando o wrapper `runhaskell`
+3. Using the `runhaskell` wrapper
 
 ```bash
 $ runhaskell -i="src" -i="tests" tests/Spec.hs
 ```
 
-## Documentação
+## Documentation
 
-Pode gerar a documentação com o [Haddock](https://haskell-haddock.readthedocs.io/).
+It's possible to generate documentation files using [Haddock](https://haskell-haddock.readthedocs.io/).
 
-1. Usando o `cabal`
+1. Using `cabal`
 
 ```bash
 $ cabal haddock --haddock-all
 ```
 
-2. Usando diretamente o `haddock`
+2. Using `haddock` directly
 
 ```bash
 $ haddock -h -o doc/html src/*.hs
 ```
 
-## Grupo 2
+## Group
 
 - **A104356** [João d'Araújo Dias Lobo](https://github.com/joaodiaslobo)
 - **A104439** [Rita da Cunha Camacho](https://github.com/ritacamacho)
